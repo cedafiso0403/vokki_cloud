@@ -13,12 +13,6 @@ func Connect() (*sql.DB, error) {
 	db, err = sql.Open("postgres", os.Getenv("DB_URL"))
 
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = db.Ping()
-
-	if err != nil {
 		log.Fatal("Cannot connect to the database: ", err)
 	}
 

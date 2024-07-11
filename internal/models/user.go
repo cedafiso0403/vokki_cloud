@@ -1,13 +1,14 @@
 package models
 
-import "vokki_cloud/internal/database"
+import (
+	"vokki_cloud/internal/database"
+)
 
 type User struct {
-	ID       int    `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Created  string `json:"created,omitempty"`
-	Updated  string `json:"updated,omitempty"`
+	ID      int    `json:"id"`
+	Email   string `json:"email"`
+	Created string `json:"created,omitempty"`
+	Updated string `json:"updated,omitempty"`
 }
 
 type NewUser struct {
@@ -22,9 +23,9 @@ func GetUser(email string) (User, error) {
 
 	var user = User{}
 
-	row := db.QueryRow("SELECT * FROM users WHERE email=$1", email)
+	row := db.QueryRow("SELECT id, created_at, email, updated_at FROM users WHERE email=$1", email)
 
-	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.Created, &user.Updated)
+	err := row.Scan(&user.ID, &user.Created, &user.Email, &user.Updated)
 
 	if err != nil {
 		return user, err
