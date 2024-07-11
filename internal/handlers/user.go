@@ -28,9 +28,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//! Add email validation
+	if !newUser.IsValidEmail() {
+		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Invalid email", r.URL.Path)
+		models.JsonResponse(w, errorResponse)
+		return
+	}
 
-	//! Add password validation
+	//! Add password validation -> To define
 
 	if newUser.Password != newUser.ConfirmationPassword {
 		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Password do not match", r.URL.Path)
@@ -46,4 +50,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = newUser.CreateUser()
+
+	if err != nil {
+		errorResponse := models.NewErrorResponse(http.StatusInternalServerError, "Internal Server Error", r.URL.Path)
+		models.JsonResponse(w, errorResponse)
+		return
+	}
+
+	models.JsonResponse(w, models.NewErrorResponse(http.StatusCreated, "User created", r.URL.Path))
 }

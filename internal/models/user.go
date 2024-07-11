@@ -11,23 +11,25 @@ type User struct {
 	Updated string `json:"updated,omitempty"`
 }
 
-type NewUser struct {
-	Email                string `json:"email"`
-	Password             string `json:"password"`
-	ConfirmationPassword string `json:"confirmation_password"`
-}
-
 func GetUser(email string) (User, error) {
 
 	db := database.GetDB()
 
 	var user = User{}
 
-	row := db.QueryRow("SELECT id, created_at, email, updated_at FROM users WHERE email=$1", email)
-
-	err := row.Scan(&user.ID, &user.Created, &user.Email, &user.Updated)
+	preparedQuery, err := db.Prepare("SELECT id, created_at, email, updated_at FROM users WHERE email=$1")
 
 	if err != nil {
+
+		return user, err
+	}
+
+	defer preparedQuery.Close()
+
+	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.Created, &user.Email, &user.Updated)
+
+	if err != nil {
+
 		return user, err
 	}
 
