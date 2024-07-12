@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"regexp"
 	"vokki_cloud/internal/database"
 
@@ -13,20 +14,22 @@ type NewUser struct {
 	ConfirmationPassword string `json:"confirmation_password"`
 }
 
-func (user *NewUser) CreateUser() error {
+func (user *NewUser) CreateUser() (User, error) {
 
 	db := database.GetDB()
 
 	preparedCreateUserQuery, err := db.Prepare("INSERT INTO users (email, password_hash) VALUES ($1, $2)")
 
 	if err != nil {
-		return err
+		log.Print(err)
+		return User{}, err
 	}
 
 	hashedPassword, err := hashPassword(user.Password)
 
 	if err != nil {
-		return err
+		log.Print(err)
+		return User{}, err
 	}
 
 	defer preparedCreateUserQuery.Close()
@@ -34,10 +37,29 @@ func (user *NewUser) CreateUser() error {
 	_, err = preparedCreateUserQuery.Exec(&user.Email, hashedPassword)
 
 	if err != nil {
-		return err
+		log.Print(err)
+		return User{}, err
 	}
 
-	return nil
+	preparedFetchUserQuery, err := db.Prepare("SELECT id, email, created_at, updated_at FROM users WHERE email=$1")
+
+	if err != nil {
+		log.Print(err)
+		return User{}, err
+	}
+
+	defer preparedFetchUserQuery.Close()
+
+	userCreated := User{}
+
+	err = preparedFetchUserQuery.QueryRow(user.Email).Scan(&userCreated.ID, &userCreated.Email, &userCreated.Created, &userCreated.Updated)
+
+	if err != nil {
+		log.Print(err)
+		return User{}, err
+	}
+
+	return userCreated, nil
 }
 
 func (user *NewUser) IsValidEmail() bool {

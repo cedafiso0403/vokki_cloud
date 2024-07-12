@@ -2,11 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"vokki_cloud/internal/email"
 	"vokki_cloud/internal/models"
+	"vokki_cloud/internal/utils"
 )
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
+
+	//email.SendVerificationEmail("cedafiso@gmail.com", "1234567890")
 
 	if r.Method != http.MethodPost {
 		errorResponse := models.NewErrorResponse(http.StatusMethodNotAllowed, "Method not allowed", r.URL.Path)
@@ -50,12 +55,21 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = newUser.CreateUser()
+	userCreated, err := newUser.CreateUser()
 
 	if err != nil {
 		errorResponse := models.NewErrorResponse(http.StatusInternalServerError, "Internal Server Error", r.URL.Path)
 		models.JsonResponse(w, errorResponse)
 		return
+	}
+
+	userJWT, err := utils.GenerateJWT(int64(userCreated.ID))
+
+	if err != nil {
+		log.Println("Error generating JWT: ", err)
+	} else {
+		models.StoreToken(int64(userCreated.ID), userJWT)
+		email.SendVerificationEmail(userCreated, userJWT)
 	}
 
 	models.JsonResponse(w, models.NewErrorResponse(http.StatusCreated, "User created", r.URL.Path))
