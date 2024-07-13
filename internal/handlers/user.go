@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/email"
 	"vokki_cloud/internal/models"
 	"vokki_cloud/internal/utils"
@@ -11,11 +12,8 @@ import (
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
-	//email.SendVerificationEmail("cedafiso@gmail.com", "1234567890")
-
 	if r.Method != http.MethodPost {
-		errorResponse := models.NewErrorResponse(http.StatusMethodNotAllowed, "Method not allowed", r.URL.Path)
-		models.JsonResponse(w, errorResponse)
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -35,7 +33,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if !newUser.IsValidEmail() {
 		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Invalid email", r.URL.Path)
-		models.JsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
 
@@ -43,7 +41,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if newUser.Password != newUser.ConfirmationPassword {
 		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Password do not match", r.URL.Path)
-		models.JsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
 
@@ -51,7 +49,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if user.Email != "" {
 		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Email already registered", r.URL.Path)
-		models.JsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
 
@@ -59,7 +57,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		errorResponse := models.NewErrorResponse(http.StatusInternalServerError, "Internal Server Error", r.URL.Path)
-		models.JsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
 
@@ -68,9 +66,42 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error generating JWT: ", err)
 	} else {
-		models.StoreToken(int64(userCreated.ID), userJWT)
+		models.StoreToken(int64(userCreated.ID), userJWT, vokki_constants.EmailToken)
 		email.SendVerificationEmail(userCreated, userJWT)
 	}
 
-	models.JsonResponse(w, models.NewErrorResponse(http.StatusCreated, "User created", r.URL.Path))
+	models.ErrorJsonResponse(w, models.NewErrorResponse(http.StatusCreated, "User created", r.URL.Path))
+}
+
+func VerifyUser(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value(vokki_constants.UserIDKey)
+
+	token := r.Context().Value(vokki_constants.TokenKey)
+
+	if userID == 0 || userID == nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	if token == "" || token == nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	err := models.ActivateUser(userID.(int64), token.(string))
+
+	if err != nil {
+		errorResponse := models.NewErrorResponse(http.StatusBadRequest, err.Error(), r.URL.Path)
+		models.ErrorJsonResponse(w, errorResponse)
+		return
+	}
+
+	w.Write([]byte("User activated"))
+
 }

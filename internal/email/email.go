@@ -17,7 +17,7 @@ func SendVerificationEmail(user models.User, token string) error {
 	auth := smtp.PlainAuth("", from, appPassword, smtpHost)
 	toList := []string{user.Email}
 	subject := "Subject: Email Verification\n"
-	body := fmt.Sprintf("Please verify your email by clicking the following link: http://localhost:8080/verify?token=%s", token)
+	body := fmt.Sprintf("Please verify your email by clicking the following link: http://localhost:8000/v1/verify?token=%s", token)
 	msg := []byte(subject + "\n" + body)
 
 	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, toList, msg)

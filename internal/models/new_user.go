@@ -41,6 +41,8 @@ func (user *NewUser) CreateUser() (User, error) {
 		return User{}, err
 	}
 
+	//! Replace later for user_profile table to make sure connection to table containing users passwords
+	//! only happens in the authentication process
 	preparedFetchUserQuery, err := db.Prepare("SELECT id, email, created_at, updated_at FROM users WHERE email=$1")
 
 	if err != nil {

@@ -22,17 +22,20 @@ func NewErrorResponse(status int, message string, path string) ErrorResponse {
 	}
 }
 
-func JsonResponse(w http.ResponseWriter, data ErrorResponse) {
+// ErrorJsonResponse is a helper function to send a JSON response with an error message
+func ErrorJsonResponse(w http.ResponseWriter, data ErrorResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	jsonResponse, err := json.Marshal(data)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "internal Server Error", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(data.Status)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, "internal Server Error", http.StatusInternalServerError)
 		return
 	}
 }
+
+//!Missing success response
