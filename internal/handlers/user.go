@@ -102,6 +102,6 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("User activated"))
+	w.Write([]byte(""))
 
 }
