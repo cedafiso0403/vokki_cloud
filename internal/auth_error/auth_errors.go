@@ -12,4 +12,5 @@ var (
 	ErrPasswordsDoNotMatch  = errors.New("passwords do not match")
 	ErrUnauthorized         = errors.New("unauthorized")
 	ErrInternalServer       = errors.New("internal server error")
+	ErrInvalidTokenIssuer   = errors.New("invalid token issuer")
 )
