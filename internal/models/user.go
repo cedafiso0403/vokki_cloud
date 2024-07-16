@@ -7,10 +7,11 @@ import (
 )
 
 type User struct {
-	ID      int    `json:"id"`
-	Email   string `json:"email"`
-	Created string `json:"created,omitempty"`
-	Updated string `json:"updated,omitempty"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Created  string `json:"created,omitempty"`
+	Updated  string `json:"updated,omitempty"`
 }
 
 func GetUser(email string) (User, error) {

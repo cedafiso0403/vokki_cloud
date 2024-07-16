@@ -1,83 +1,54 @@
 package models
 
 import (
+	"database/sql"
 	"log"
 	"regexp"
 	"vokki_cloud/internal/database"
-
-	"golang.org/x/crypto/bcrypt"
+	"vokki_cloud/internal/utils"
 )
 
-type NewUser struct {
+type NewUserRequest struct {
 	Email                string `json:"email"`
 	Password             string `json:"password"`
 	ConfirmationPassword string `json:"confirmation_password"`
 }
 
-func (user *NewUser) CreateUser() (User, error) {
+func (newUser *NewUserRequest) CreateUser() (User, error) {
 
 	db := database.GetDB()
 
-	preparedCreateUserQuery, err := db.Prepare("INSERT INTO users (email, password_hash) VALUES ($1, $2)")
+	user := User{}
+
+	preparedCreateUserQuery, err := db.Prepare("INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email")
 
 	if err != nil {
-		log.Print(err)
-		return User{}, err
-	}
-
-	hashedPassword, err := hashPassword(user.Password)
-
-	if err != nil {
-		log.Print(err)
+		log.Print("Error preparing create user: ", err)
 		return User{}, err
 	}
 
 	defer preparedCreateUserQuery.Close()
 
-	_, err = preparedCreateUserQuery.Exec(&user.Email, hashedPassword)
+	hashedPassword, err := utils.HashPassword(newUser.Password)
 
 	if err != nil {
-		log.Print(err)
+		log.Print("Error hashing password: ", err)
 		return User{}, err
 	}
 
-	//! Replace later for user_profile table to make sure connection to table containing users passwords
-	//! only happens in the authentication process
-	preparedFetchUserQuery, err := db.Prepare("SELECT id, email, created_at, updated_at FROM users WHERE email=$1")
+	err = preparedCreateUserQuery.QueryRow(&newUser.Email, hashedPassword).Scan(&user.ID, &user.Email)
 
-	if err != nil {
-		log.Print(err)
+	if err != nil && err != sql.ErrNoRows {
+		log.Print("Error creating user: ", err)
 		return User{}, err
 	}
 
-	defer preparedFetchUserQuery.Close()
-
-	userCreated := User{}
-
-	err = preparedFetchUserQuery.QueryRow(user.Email).Scan(&userCreated.ID, &userCreated.Email, &userCreated.Created, &userCreated.Updated)
-
-	if err != nil {
-		log.Print(err)
-		return User{}, err
-	}
-
-	return userCreated, nil
+	return user, nil
 }
 
-func (user *NewUser) IsValidEmail() bool {
+func (user *NewUserRequest) IsValidEmail() bool {
 	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 	return emailRegex.MatchString(user.Email)
 }
 
 //! Missing is password valid
-
-func hashPassword(password string) (string, error) {
-	// bcripts hash and salt password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	if err != nil {
-		return "", err
-	}
-
-	return string(hashedPassword), nil
-}
