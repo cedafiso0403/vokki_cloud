@@ -4,6 +4,7 @@ import (
 	"log"
 	"vokki_cloud/internal/config"
 	"vokki_cloud/internal/database"
+	"vokki_cloud/internal/router"
 	"vokki_cloud/internal/shared"
 
 	_ "github.com/lib/pq"
@@ -22,6 +23,10 @@ func main() {
 	shared.InitializeTokenManager()
 
 	database.Connect()
+
+	r := router.SetupRouter()
+
+	server.Handler = r
 
 	log.Println(server.ListenAndServe())
 
