@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"vokki_cloud/internal/router"
 
 	"github.com/joho/godotenv"
 )
@@ -30,15 +29,12 @@ func LoadConfig() (*http.Server, error) {
 
 	log.Println("Successfully loaded .env file")
 
-	r := router.SetupRouter()
-
 	server := &http.Server{
 		Addr:              ":8000",
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
-		Handler:           r,
 	}
 
 	log.Println("Server loaded")
