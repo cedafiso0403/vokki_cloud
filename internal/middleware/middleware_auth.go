@@ -3,27 +3,29 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/models"
+	"vokki_cloud/internal/shared"
 	"vokki_cloud/internal/utils"
 )
 
-func EmailVerificationMiddleware(next http.Handler) http.HandlerFunc {
+func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
 
-		if r.Method != http.MethodGet {
-			http.Error(w, "", http.StatusBadRequest)
+		if authHeader == "" {
+			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}
 
-		//! Should be a constant?
-		token := r.URL.Query().Get("token")
-
-		if token == "" {
-			http.Error(w, "", http.StatusBadRequest)
+		if strings.TrimPrefix(authHeader, "Bearer ") == "" {
+			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}
+
+		token := strings.TrimPrefix(authHeader, "Bearer ")
 
 		decodedToken, err := utils.ParseJWT(token)
 
@@ -43,11 +45,27 @@ func EmailVerificationMiddleware(next http.Handler) http.HandlerFunc {
 			return
 		}
 
+		if shared.GetTokenManager().TokenExists(token) {
+
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, vokki_constants.UserIDKey, decodedToken.UserID)
+			ctx = context.WithValue(ctx, vokki_constants.TokenKey, token)
+			r = r.WithContext(ctx)
+
+			next.ServeHTTP(w, r)
+		}
+
+		if !models.VerifyToken(token) {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, vokki_constants.UserIDKey, decodedToken.UserID)
 		ctx = context.WithValue(ctx, vokki_constants.TokenKey, token)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
+
 	})
 }

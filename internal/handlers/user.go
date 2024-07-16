@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/email"
 	"vokki_cloud/internal/models"
@@ -17,12 +18,16 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var newUser models.NewUser
+	var newUser models.NewUserRequest
 
-	err := json.NewDecoder(r.Body).Decode(&newUser)
+	decoder := json.NewDecoder(r.Body)
+
+	decoder.DisallowUnknownFields()
+
+	err := decoder.Decode(&newUser)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -32,7 +37,13 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !newUser.IsValidEmail() {
-		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Invalid email", r.URL.Path)
+		errorResponse := models.ErrorResponse{
+			Timestamp: time.Now().UTC().String(),
+			Status:    http.StatusBadRequest,
+			Message:   "Invalid email",
+			Patch:     r.URL.Path,
+		}
+
 		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
@@ -40,7 +51,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	//! Add password validation -> To define
 
 	if newUser.Password != newUser.ConfirmationPassword {
-		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Password do not match", r.URL.Path)
+		errorResponse := models.ErrorResponse{
+			Timestamp: time.Now().UTC().String(),
+			Status:    http.StatusBadRequest,
+			Message:   "Passwords do not match",
+			Patch:     r.URL.Path,
+		}
 		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
@@ -48,7 +64,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user, _ := models.GetUser(newUser.Email)
 
 	if user.Email != "" {
-		errorResponse := models.NewErrorResponse(http.StatusBadRequest, "Email already registered", r.URL.Path)
+		errorResponse := models.ErrorResponse{
+			Timestamp: time.Now().UTC().String(),
+			Status:    http.StatusBadRequest,
+			Message:   "Email already in use",
+			Patch:     r.URL.Path,
+		}
 		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
@@ -56,7 +77,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	userCreated, err := newUser.CreateUser()
 
 	if err != nil {
-		errorResponse := models.NewErrorResponse(http.StatusInternalServerError, "Internal Server Error", r.URL.Path)
+		errorResponse := models.ErrorResponse{
+			Timestamp: time.Now().UTC().String(),
+			Status:    http.StatusInternalServerError,
+			Message:   "",
+			Patch:     r.URL.Path,
+		}
 		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}
@@ -70,15 +96,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		email.SendVerificationEmail(userCreated, userJWT)
 	}
 
-	models.ErrorJsonResponse(w, models.NewErrorResponse(http.StatusCreated, "User created", r.URL.Path))
+	models.SuccessJsonResponse(w, map[string]string{
+		"message": "User created",
+	})
 }
 
 func VerifyUser(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != http.MethodGet {
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
 
 	userID := r.Context().Value(vokki_constants.UserIDKey)
 
@@ -97,7 +120,12 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	err := models.ActivateUser(userID.(int64), token.(string))
 
 	if err != nil {
-		errorResponse := models.NewErrorResponse(http.StatusBadRequest, err.Error(), r.URL.Path)
+		errorResponse := models.ErrorResponse{
+			Timestamp: time.Now().UTC().String(),
+			Status:    http.StatusBadRequest,
+			Message:   err.Error(),
+			Patch:     r.URL.Path,
+		}
 		models.ErrorJsonResponse(w, errorResponse)
 		return
 	}

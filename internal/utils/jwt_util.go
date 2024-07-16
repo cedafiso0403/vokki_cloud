@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 	vokki_constants "vokki_cloud/internal/constants"
-	"vokki_cloud/internal/models"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -12,8 +11,13 @@ import (
 // !Create a key on env
 var jwtKey = []byte("your-secret-key")
 
+type Claims struct {
+	UserID int64 `json:"user_id"`
+	jwt.StandardClaims
+}
+
 func GenerateJWT(userID int64) (string, error) {
-	claims := &models.Claims{
+	claims := &Claims{
 		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
@@ -26,10 +30,10 @@ func GenerateJWT(userID int64) (string, error) {
 	return token.SignedString(jwtKey)
 }
 
-func ParseJWT(tokenString string) (*models.Claims, error) {
-	claims := &models.Claims{}
+func ParseJWT(tokenString string) (*Claims, error) {
+	claims := Claims{}
 
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
@@ -44,7 +48,7 @@ func ParseJWT(tokenString string) (*models.Claims, error) {
 		return nil, errors.New("invalid token")
 	}
 
-	return claims, nil
+	return &claims, nil
 }
 
 // func ValidateToken(tokenString string) (*Claims, error) {
