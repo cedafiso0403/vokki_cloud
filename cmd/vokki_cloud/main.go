@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"vokki_cloud/internal/config"
+	"vokki_cloud/config"
 	"vokki_cloud/internal/database"
 	"vokki_cloud/internal/router"
 	"vokki_cloud/internal/shared"
