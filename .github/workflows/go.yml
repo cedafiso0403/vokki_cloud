@@ -65,7 +65,7 @@ jobs:
             rm -rf ~/vokki_cloud
             cd ~
             git clone git@github.com:cedafiso0403/vokki_cloud.git
-            git fetch
+            git pull
             export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
             export DB_URL=${{ secrets.DB_URL }}
             export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
