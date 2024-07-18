@@ -11,7 +11,11 @@ set -e
 rm -rf ~/vokki_cloud
 
 # Kill any existing Go processes
-ps aux | awk '/\/tmp\/go-/' | sed -n 's/  */ /gp' | cut -d ' ' -f 2 | xargs kill -9
+PID = ps aux | awk '/\/tmp\/go-/' | sed -n 's/  */ /gp' | cut -d ' ' -f 2
+
+if [ -n "$PID" ]; then
+  kill -9 $PID
+fi
 
 # Clone the repository
 cd ~
