@@ -18,10 +18,10 @@ cd ~
 git clone git@github.com:cedafiso0403/vokki_cloud.git
 
 # Set environment variables
-export SUPABASE_API_KEY=$1
-export DB_URL=$2
-export FROM_EMAIL=$3
-export FROM_EMAIL_PASSWORD=$4
+export SUPABASE_API_KEY="$1"
+export DB_URL="$2"
+export FROM_EMAIL="$3"
+export FROM_EMAIL_PASSWORD="$4"
 
 # Build and run the Go application
 cd vokki_cloud
