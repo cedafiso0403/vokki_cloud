@@ -64,17 +64,19 @@ jobs:
           ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
           echo Hello from GitHub Actions
           git clone git@github.com:cedafiso0403/vokki_cloud.git /home/ec2-user/vokki_cloud
+          SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
+          DB_URL=${{ secrets.DB_URL }}
+          FROM_EMAIL=${{ secrets.FROM_EMAIL }}
+          FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
+          git pull
+          git checkout main
+          go build ./vokki_cloud
+          go run ./vokki_cloud/cmd/vokki_cloud/main.go
           EOF
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
           SSH_PORT: '22'
-      # - name: clone repo
-      #   run: ls && 
-      # - name: checkout main branch
-      #   run: git checkout main
-      # - name: build and run
-      #   run: cd vokki_cloud && go build ./... && go run cmd/vokki_cloud/main.go
       - name: disconnect from EC2 instance
         run: exit
       - name: revoke runner ip address
