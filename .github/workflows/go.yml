@@ -65,8 +65,7 @@ jobs:
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
       - name: SSH into EC2 and run deployment script
         run: |
-          scp -i ~/.ssh/id_ed25519 deploy.sh $SSH_USER@$SSH_HOST:~
-          ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST 'bash -s' < scripts/deploy.sh
+          scp -i ~/.ssh/id_ed25519 script/deploy.sh $SSH_USER@$SSH_HOST:~
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
