@@ -71,7 +71,7 @@ jobs:
           username: ec2-user
           port: 22
           key: ${{ secrets.AWS_SSH_KEY }}
-          source: ~/deploy/deploy.sh
+          source: ~/deploy.sh
           target: ~
           debug: true  # Enable debug mode for detailed output
       - name: SSH into EC2 and execute deploy script
