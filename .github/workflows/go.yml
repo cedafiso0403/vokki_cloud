@@ -4,10 +4,9 @@
 name: Go
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: 
+      - '*'
 
 jobs:
 
@@ -28,6 +27,8 @@ jobs:
       run: go test -v ./...
 
   deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
     name: deploy
     runs-on: ubuntu-latest
     env:
