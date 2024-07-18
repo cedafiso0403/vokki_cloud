@@ -69,13 +69,12 @@ jobs:
             git init  # Initialize Git if not already initialized
             git remote add origin git@github.com:cedafiso0403/vokki_cloud.git
             git fetch
-            git checkout main
             export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
             export DB_URL=${{ secrets.DB_URL }}
             export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
             export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
-            go build ./vokki_cloud
-            go run ./vokki_cloud/cmd/vokki_cloud/main.go
+            go build ./..
+            go run ./cmd/vokki_cloud/main.go
           EOF
         env:
           SSH_USER: 'ec2-user'
