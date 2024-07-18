@@ -57,13 +57,12 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
-
       - name: Create SSH config
         run: |
           echo -e "Host $SSH_HOST\n\tStrictHostKeyChecking no\n\tIdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
         env:
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
-      - name: SSH into EC2 and run deployment script
+      - name: SSH into EC2 and Clone Repo
         run: |
           scp -i ~/.ssh/id_ed25519 script/deploy.sh $SSH_USER@$SSH_HOST:~
         env:
