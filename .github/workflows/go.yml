@@ -62,8 +62,8 @@ jobs:
       - name: SSH into EC2 and Clone Repo
         run: |
           ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
-            rm -rf /home/ec2-user/vokki_cloud
-            mkdir /home/ec2-user/vokki_cloud
+            rm -rf ~/vokki_cloud
+            mkdir ~/vokki_cloud
             git clone git@github.com:cedafiso0403/vokki_cloud.git /home/ec2-user/
             export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
             export DB_URL=${{ secrets.DB_URL }}
