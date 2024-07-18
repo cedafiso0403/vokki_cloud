@@ -57,11 +57,11 @@ jobs:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
           SSH_PORT: '22'
-          COMMAND: 'echo Hello from GitHub Actions'
-      - name: connect to EC2 instance
-        run: echo $SSH_USER && echo SSH_HOT && ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST
+          COMMAND: |
+            echo Hello from GitHub Actions
+            git clone git@github.com:cedafiso0403/vokki_cloud.git
       # - name: clone repo
-      #   run: ls && git clone git@github.com:cedafiso0403/vokki_cloud.git
+      #   run: ls && 
       # - name: checkout main branch
       #   run: git checkout main
       # - name: build and run
