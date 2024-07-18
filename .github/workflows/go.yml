@@ -80,6 +80,11 @@ jobs:
           SSH_PORT: '22'
       - name: SSH into EC2 and execute deploy script
         uses: appleboy/ssh-action@master
+        env:
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          FROM_EMAIL_PASSWORD: ${{ secrets.FROM_EMAIL_PASSWORD }}
+          DB_URL: ${{ secrets.DB_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
         with:
             host: ${{ secrets.AWS_SECRET_ADDRESS }}
             username: ec2-user
@@ -87,8 +92,7 @@ jobs:
             key: ${{ secrets.AWS_SSH_KEY }}
             script: |
               chmod +x ~/deploy.sh
-              ~/deploy.sh ${{ secrets.SUPABASE_API_KEY }} ${{ secrets.DB_URL }} ${{ secrets.FROM_EMAIL }} ${{ secrets.FROM_EMAIL_PASSWORD }} > deploy.log
-              disown
+              ~/deploy.sh $SUPABASE_API_KEY $DB_URL $FROM_EMAIL $FROM_EMAIL_PASSWORD > deploy.log
       - name: revoke runner ip address
         run: |
           aws ec2 revoke-security-group-ingress \
