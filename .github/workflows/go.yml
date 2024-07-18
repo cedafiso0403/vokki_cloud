@@ -69,7 +69,7 @@ jobs:
       - name: Copy deploy script to remote server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.AWS_SECRET_ADDRESS }}
+          host: ec2-user@${{ secrets.AWS_SECRET_ADDRESS }}
           username: ec2-user
           port: 22
           key: ${{ secrets.AWS_SSH_KEY }}
