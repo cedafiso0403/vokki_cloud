@@ -29,6 +29,12 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Upload deploy script
+      uses: actions/upload-artifact@v2
+      with:
+        name: deploy-script
+        path: vokki_cloud/scripts/deploy.sh
+
   deploy:
     if: github.ref == 'refs/heads/main'
     needs: build
@@ -41,7 +47,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: deploy-script
-          path: ~/scritps/deploy.sh
+          path: ~/deploy
       - name: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
