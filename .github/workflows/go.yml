@@ -48,8 +48,6 @@ jobs:
         with:
           name: deploy-script
           path: ~/deploy
-      - name: List Artifacts
-        run: ls ~/deploy
       - name: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -71,14 +69,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
       - name: SSH into EC2 and Clone Repo
-        run: |          
+        run: |    
+              ls ~/deploy      
               scp -o StrictHostKeyChecking=no -p $SSH_PORT ~/deploy/deploy.sh $SSH_USER@$SSH_HOST:~
-              ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
-                export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
-                export DB_URL=${{ secrets.DB_URL }}
-                export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
-                export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
-              EOF
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
@@ -91,6 +84,10 @@ jobs:
             port: 22
             key: ${{ secrets.AWS_SSH_KEY }}
             script: |
+              export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
+              export DB_URL=${{ secrets.DB_URL }}
+              export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
+              export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
               chmod +x ~/deploy.sh
               ~/deploy.sh
       - name: revoke runner ip address
