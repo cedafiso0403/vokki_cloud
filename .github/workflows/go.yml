@@ -66,16 +66,18 @@ jobs:
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
-      - name: Copy deploy script to remote server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ec2-user@${{ secrets.AWS_SECRET_ADDRESS }}
-          username: ec2-user
-          port: 22
-          key: ${{ secrets.AWS_SSH_KEY }}
-          source: ~/deploy/deploy.sh
-          target: ~
-          debug: true  # Enable debug mode for detailed output
+
+      
+      - name: SSH into EC2 and Clone Repo
+        run: |
+              ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+              scp -o StrictHostKeyChecking=no -P $SSH_PORT ~/deploy/deploy.sh $SSH_USER @$secrets.SSH_HOST:~
+              EOF
+        env:
+          SSH_USER: 'ec2-user'
+          SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
+          SSH_PORT: '22'
+
       - name: SSH into EC2 and execute deploy script
         uses: appleboy/ssh-action@master
         with:
