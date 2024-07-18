@@ -63,13 +63,16 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
             rm -rf ~/vokki_cloud
-            git clone git@github.com:cedafiso0403/vokki_cloud.git
+            mkdir -p /home/ec2-user/vokki_cloud
+            cd /home/ec2-user/vokki_cloud
+            git init  # Initialize Git if not already initialized
+            git remote add origin git@github.com:cedafiso0403/vokki_cloud.git
+            git fetch
+            git checkout main
             export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
             export DB_URL=${{ secrets.DB_URL }}
             export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
             export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
-            git pull
-            git checkout main
             go build ./vokki_cloud
             go run ./vokki_cloud/cmd/vokki_cloud/main.go
           EOF
