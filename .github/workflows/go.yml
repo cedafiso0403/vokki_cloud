@@ -37,6 +37,11 @@ jobs:
     env:
       AWS_INSTANCE_SG_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}  
     steps:
+      - name: Download deploy script
+        uses: actions/download-artifact@v2
+        with:
+          name: deploy-script
+          path: ~/deploy
       - name: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -53,24 +58,25 @@ jobs:
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
-      - name: Deploy to EC2
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Copy deploy script to remote server
+        uses: appleboy/scp-action@master
         with:
-          ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
-      - name: Create SSH config
-        run: |
-          echo -e "Host $SSH_HOST\n\tStrictHostKeyChecking no\n\tIdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
-        env:
-          SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
-      - name: SSH into EC2 and Clone Repo
-        run: |
-          scp -i ~/.ssh/id_ed25519 script/deploy.sh $SSH_USER@$SSH_HOST:~
-        env:
-          SSH_USER: 'ec2-user'
-          SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
-          SSH_PORT: '22'
-      - name: disconnect from EC2 instance
-        run: exit
+          host: ${{ secrets.AWS_SECRET_ADDRESS }}
+          username: ec2-user
+          port: 22
+          key: ${{ secrets.AWS_SSH_KEY }}
+          source: ~/deploy/deploy.sh
+          target: ~
+      - name: SSH into EC2 and execute deploy script
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.AWS_SECRET_ADDRESS }}
+            username: ec2-user
+            port: 22
+            key: ${{ secrets.AWS_SSH_KEY }}
+            script: |
+              chmod +x ~/deploy.sh
+              ~/deploy.sh
       - name: revoke runner ip address
         run: |
           aws ec2 revoke-security-group-ingress \
