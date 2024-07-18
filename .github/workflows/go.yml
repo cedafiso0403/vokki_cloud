@@ -59,7 +59,7 @@ jobs:
           SSH_PORT: '22'
           COMMAND: 'echo Hello from GitHub Actions'
       - name: connect to EC2 instance
-        run: ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST -p $SSH_PORT $COMMAND
+        run: ssh $SSH_USER@$SSH_HOST -p $SSH_PORT $COMMAND
       # - name: clone repo
       #   run: ls && git clone git@github.com:cedafiso0403/vokki_cloud.git
       # - name: checkout main branch
