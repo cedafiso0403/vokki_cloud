@@ -87,7 +87,7 @@ jobs:
             key: ${{ secrets.AWS_SSH_KEY }}
             script: |
               chmod +x ~/deploy.sh
-              ~/deploy.sh ${{ secrets.SUPABASE_API_KEY }} ${{ secrets.DB_URL }} ${{ secrets.FROM_EMAIL }} ${{ secrets.FROM_EMAIL_PASSWORD }} > deploy.log 2>&1 & disown
+              ~/deploy.sh ${{ secrets.SUPABASE_API_KEY }} ${{ secrets.DB_URL }} ${{ secrets.FROM_EMAIL }} ${{ secrets.FROM_EMAIL_PASSWORD }} > deploy.log 2>&1 &
               disown
       - name: revoke runner ip address
         run: |
