@@ -2,7 +2,7 @@
 
 echo "Deploying Vokki Cloud..."
 
-echo "From email: ${FROM_EMAIL}"
+echo "From email: $FROM_EMAIL"
 
 # Exit script on any error
 set -e
