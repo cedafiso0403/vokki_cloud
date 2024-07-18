@@ -20,6 +20,7 @@ func LoadConfig() (*http.Server, error) {
 
 	log.SetOutput(multiWriter)
 
+	// Comment out for production
 	// if err := godotenv.Load(); err != nil {
 	// 	log.Printf("Error loading .env file: %v", err)
 	// 	return nil, err
