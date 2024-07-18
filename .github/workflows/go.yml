@@ -49,8 +49,15 @@ jobs:
             --protocol tcp \
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
-      - name: connect to EC2 instance
-        run: ssh -i ${{ secrets.AWS_SSH_KEY }} ec2-user@${{ secrets.AWS_SECRET_ADDRESS}}
+      - name: Deploy to EC2
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
+        env:
+          SSH_USER: 'ec2-user'
+          SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
+          SSH_PORT: '22'
+          COMMAND: 'echo Hello from GitHub Actions'
       - name: clone repo
         run: git clone git@github.com:cedafiso0403/vokki_cloud.git
       - name: checkout main branch
