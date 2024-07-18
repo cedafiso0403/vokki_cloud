@@ -53,13 +53,16 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
+      - name: SSH into EC2 and Clone Repo
+        run: |
+          ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+          echo Hello from GitHub Actions
+          git clone git@github.com:cedafiso0403/vokki_cloud.git /home/ec2-user/vokki_cloud
+          EOF
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
           SSH_PORT: '22'
-          COMMAND: |
-            echo Hello from GitHub Actions
-            git clone git@github.com:cedafiso0403/vokki_cloud.git
       # - name: clone repo
       #   run: ls && 
       # - name: checkout main branch
