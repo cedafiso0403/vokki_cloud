@@ -73,6 +73,7 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           source: ~/deploy/deploy.sh
           target: ~
+          debug: true  # Enable debug mode for detailed output
       - name: SSH into EC2 and execute deploy script
         uses: appleboy/ssh-action@master
         with:
