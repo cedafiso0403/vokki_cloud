@@ -67,10 +67,8 @@ jobs:
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
       - name: SSH into EC2 and Clone Repo
-        run: |
-              ssh -o StrictHostKeyChecking=no -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+        run: |          
               scp -o StrictHostKeyChecking=no -p $SSH_PORT ~/deploy/deploy.sh $SSH_USER@$SSH_HOST:~
-              EOF
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
