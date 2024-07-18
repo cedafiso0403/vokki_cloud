@@ -70,9 +70,6 @@ jobs:
           ssh-private-key: ${{ secrets.AWS_SSH_KEY }}
       - name: SSH into EC2 and Clone Repo
         run: |    
-              ls ~/deploy    
-              ls ~/deploy/*
-              ls   
               scp -o StrictHostKeyChecking=no -P $SSH_PORT /home/runner/deploy/deploy.sh $SSH_USER@$SSH_HOST:/home/ec2-user/
         env:
           SSH_USER: 'ec2-user'
