@@ -58,12 +58,14 @@ jobs:
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
           SSH_PORT: '22'
           COMMAND: 'echo Hello from GitHub Actions'
-      - name: clone repo
-        run: ls && git clone git@github.com:cedafiso0403/vokki_cloud.git
-      - name: checkout main branch
-        run: git checkout main
-      - name: build and run
-        run: cd vokki_cloud && go build ./... && go run cmd/vokki_cloud/main.go
+      - name: connect to EC2 instance
+        run: ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST -p $SSH_PORT $COMMAND
+      # - name: clone repo
+      #   run: ls && git clone git@github.com:cedafiso0403/vokki_cloud.git
+      # - name: checkout main branch
+      #   run: git checkout main
+      # - name: build and run
+      #   run: cd vokki_cloud && go build ./... && go run cmd/vokki_cloud/main.go
       - name: disconnect from EC2 instance
         run: exit
       - name: revoke runner ip address
