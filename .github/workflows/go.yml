@@ -50,7 +50,7 @@ jobs:
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
       - name: connect to EC2 instance
-        run: ssh -i ${{ secrets.AWS_KEY_PAIR }} ec2-user@${{ secrets.AWS_SECRET_ADDRESS}}
+        run: ssh -i ${{ secrets.AWS_SSH_KEY }} ec2-user@${{ secrets.AWS_SECRET_ADDRESS}}
       - name: clone repo
         run: git clone git@github.com:cedafiso0403/vokki_cloud.git
       - name: checkout main branch
