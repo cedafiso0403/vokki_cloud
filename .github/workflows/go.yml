@@ -73,7 +73,7 @@ jobs:
               ls ~/deploy    
               ls ~/deploy/*
               ls   
-              scp -o StrictHostKeyChecking=no -p $SSH_PORT /home/runner/deploy/deploy.sh $SSH_USER@$SSH_HOST:~/
+              scp -o StrictHostKeyChecking=no -p $SSH_PORT /home/runner/deploy/deploy.sh $SSH_USER@$SSH_HOST:/home/ec2-user/
         env:
           SSH_USER: 'ec2-user'
           SSH_HOST: ${{ secrets.AWS_SECRET_ADDRESS }}
