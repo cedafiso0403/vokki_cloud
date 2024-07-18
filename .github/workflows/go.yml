@@ -59,7 +59,7 @@ jobs:
           SSH_PORT: '22'
           COMMAND: 'echo Hello from GitHub Actions'
       - name: clone repo
-        run: git clone git@github.com:cedafiso0403/vokki_cloud.git
+        run: ls && git clone git@github.com:cedafiso0403/vokki_cloud.git
       - name: checkout main branch
         run: git checkout main
       - name: build and run
