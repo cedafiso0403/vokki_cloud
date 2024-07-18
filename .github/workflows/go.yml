@@ -86,12 +86,9 @@ jobs:
             port: 22
             key: ${{ secrets.AWS_SSH_KEY }}
             script: |
-              export SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}
-              export DB_URL=${{ secrets.DB_URL }}
-              export FROM_EMAIL=${{ secrets.FROM_EMAIL }}
-              export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
               chmod +x ~/deploy.sh
-              ~/deploy.sh
+              nohup ~/deploy.sh ${{ secrets.SUPABASE_API_KEY }} ${{ secrets.DB_URL }} ${{ secrets.FROM_EMAIL }} ${{ secrets.FROM_EMAIL_PASSWORD }} deploy.log 2>&1 &
+              disown
       - name: revoke runner ip address
         run: |
           aws ec2 revoke-security-group-ingress \
