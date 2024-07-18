@@ -30,7 +30,7 @@ jobs:
       run: go test -v ./...
 
     - name: Upload deploy script
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: deploy-script
         path: scripts/deploy.sh
@@ -44,7 +44,7 @@ jobs:
       AWS_INSTANCE_SG_ID: ${{ secrets.AWS_SECURITY_GROUP_ID }}  
     steps:
       - name: Download deploy script
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: deploy-script
           path: ~/deploy
@@ -65,7 +65,7 @@ jobs:
             --port 22 \
             --cidr ${{ steps.ip.outputs.ipv4 }}/32
       - name: Copy deploy script to remote server
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.AWS_SECRET_ADDRESS }}
           username: ec2-user
