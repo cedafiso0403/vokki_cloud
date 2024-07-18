@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo "Deploying Vokki Cloud..."
+
+echo "From email: $3"
+
 # Exit script on any error
 set -e
 
