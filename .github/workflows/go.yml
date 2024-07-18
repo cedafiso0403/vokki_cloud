@@ -48,6 +48,8 @@ jobs:
         with:
           name: deploy-script
           path: ~/deploy
+      - name: List Artifacts
+        run: ls ~/deploy
       - name: configure_aws_credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -71,7 +73,7 @@ jobs:
           username: ec2-user
           port: 22
           key: ${{ secrets.AWS_SSH_KEY }}
-          source: ~/deploy.sh
+          source: ~/deploy/deploy.sh
           target: ~
           debug: true  # Enable debug mode for detailed output
       - name: SSH into EC2 and execute deploy script
