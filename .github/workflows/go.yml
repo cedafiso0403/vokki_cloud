@@ -4,6 +4,9 @@
 name: Go
 
 on:
+  push:
+    branches: 
+      - '*'
   pull_request:
     branches: 
       - '*'
@@ -74,7 +77,7 @@ jobs:
             export FROM_EMAIL_PASSWORD=${{  secrets.FROM_EMAIL_PASSWORD }}
             cd vokki_cloud
             go build ./...
-            go run ./cmd/vokki_cloud/main.go
+            go run ./cmd/vokki_cloud/main.go &
           EOF
         env:
           SSH_USER: 'ec2-user'
