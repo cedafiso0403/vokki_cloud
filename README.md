@@ -1,4 +1,4 @@
-Vokki Cloud!
+Vokki Cloud! Vx.x.x
 
 For this project we are using Golang as a framework for our cloud services and delve debugger.
 
