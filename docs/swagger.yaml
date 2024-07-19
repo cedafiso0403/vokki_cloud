@@ -1,0 +1,80 @@
+definitions:
+  models.BadRequestErrorResponse:
+    properties:
+      error_code:
+        example: 400
+        type: integer
+      message:
+        example: Invalid request parameters
+        type: string
+      timestamp:
+        example: "2024-07-18T15:36:59Z"
+        type: string
+    type: object
+  models.UnauthorizedErrorResponse:
+    properties:
+      error_code:
+        example: 401
+        type: integer
+      message:
+        example: Unauthorized access
+        type: string
+      timestamp:
+        example: "2024-07-18T15:36:59Z"
+        type: string
+    type: object
+  models.UserAuthenticatedResponse:
+    properties:
+      token:
+        example: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJleHBpcmVkIjogMTY5MDY1MDAwMCwgImlhdCI6IDE2ODk3OTMwMDB9.njvE5Lgs1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8
+        type: string
+      tokenType:
+        example: Bearer
+        type: string
+    type: object
+  services.Credentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the API for Vokki mobile app
+  title: Vokki Cloud API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user by email and password
+      parameters:
+      - description: Email and Password
+        in: body
+        name: Credentials
+        required: true
+        schema:
+          $ref: '#/definitions/services.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/models.UserAuthenticatedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.BadRequestErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.UnauthorizedErrorResponse'
+        "500":
+          description: Internal Server Error
+      summary: Authenticate user
+      tags:
+      - Auth
+swagger: "2.0"

@@ -41,7 +41,7 @@ func ParseJWT(tokenString string) (*Claims, error) {
 		if err == jwt.ErrSignatureInvalid {
 			return nil, errors.New("invalid token signature")
 		}
-		return nil, err
+		return nil, errors.New("")
 	}
 
 	if !token.Valid {
