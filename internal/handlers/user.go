@@ -13,6 +13,8 @@ import (
 
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
+	timeNow := time.Now().UTC()
+
 	if r.Method != http.MethodPost {
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -37,53 +39,49 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !newUser.IsValidEmail() {
-		errorResponse := models.ErrorResponse{
-			Timestamp: time.Now().UTC().String(),
+		errorResponse := models.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Invalid email",
-			Patch:     r.URL.Path,
 		}
 
-		models.ErrorJsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	//! Add password validation -> To define
 
 	if newUser.Password != newUser.ConfirmationPassword {
-		errorResponse := models.ErrorResponse{
-			Timestamp: time.Now().UTC().String(),
+		errorResponse := models.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Passwords do not match",
-			Patch:     r.URL.Path,
 		}
-		models.ErrorJsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	user, _ := models.GetUser(newUser.Email)
 
 	if user.Email != "" {
-		errorResponse := models.ErrorResponse{
-			Timestamp: time.Now().UTC().String(),
+		errorResponse := models.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Email already in use",
-			Patch:     r.URL.Path,
 		}
-		models.ErrorJsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	userCreated, err := newUser.CreateUser()
 
 	if err != nil {
-		errorResponse := models.ErrorResponse{
-			Timestamp: time.Now().UTC().String(),
+		errorResponse := models.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusInternalServerError,
 			Message:   "",
-			Patch:     r.URL.Path,
 		}
-		models.ErrorJsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
@@ -103,6 +101,8 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 func VerifyUser(w http.ResponseWriter, r *http.Request) {
 
+	timeNow := time.Now().UTC()
+
 	userID := r.Context().Value(vokki_constants.UserIDKey)
 
 	token := r.Context().Value(vokki_constants.TokenKey)
@@ -120,13 +120,12 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	err := models.ActivateUser(userID.(int64), token.(string))
 
 	if err != nil {
-		errorResponse := models.ErrorResponse{
-			Timestamp: time.Now().UTC().String(),
+		errorResponse := models.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   err.Error(),
-			Patch:     r.URL.Path,
 		}
-		models.ErrorJsonResponse(w, errorResponse)
+		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
