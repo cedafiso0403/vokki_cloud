@@ -6,10 +6,10 @@ name: Go
 on:
   push:
     branches: 
-      - '*'
+      - 'main'
   pull_request:
-    branches: 
-      - '*'
+    branches-ignore:
+      - 'main'
 
 jobs:
 
