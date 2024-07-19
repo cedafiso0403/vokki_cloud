@@ -45,4 +45,4 @@ echo "Repository cloned"
 # Build and run the Go application
 cd vokki_cloud
 go build ./...
-nohup go run ./cmd/vokki_cloud/main.go > app.log 2>&1 &
+nohup go run ./cmd/main.go > app.log 2>&1 &
