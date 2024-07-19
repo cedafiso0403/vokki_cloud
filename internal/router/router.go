@@ -6,15 +6,21 @@ import (
 	"vokki_cloud/internal/middleware"
 
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func SetupRouter() *mux.Router {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/v1/login", handlers.Login).Methods("POST")
-	r.HandleFunc("/v1/register", handlers.RegisterUser).Methods("POST")
-	r.HandleFunc("/v1/verify", middleware.EmailVerificationMiddleware(http.HandlerFunc(handlers.VerifyUser))).Methods("GET")
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
+	//apiRouter := r.PathPrefix("/api/v1").Subrouter()
+
+	//Public routes
+	r.HandleFunc("/login", handlers.Login).Methods("POST")
+	r.HandleFunc("/register", handlers.RegisterUser).Methods("POST")
+	r.HandleFunc("/verify", middleware.EmailVerificationMiddleware(http.HandlerFunc(handlers.VerifyUser))).Methods("GET")
 
 	return r
 }
