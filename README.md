@@ -5,7 +5,7 @@ For this project we are using Golang as a framework for our cloud services and d
 To run:
 
 ```
-go run ./cmd/vokki_cloud
+go run ./cmd/main.go
 ```
 
 For running debugger is neccesarry to set up delve first.
@@ -13,7 +13,7 @@ For running debugger is neccesarry to set up delve first.
 After installing delve:
 
 ```
-dlv debug ./cmd/vokki_cloud
+dlv debug ./cmd/main.go
 ```
 
 There you go! You are all set up 
