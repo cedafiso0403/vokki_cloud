@@ -1,5 +1,5 @@
 definitions:
-  models.BadRequestErrorResponse:
+  httputil.BadRequestErrorResponse:
     properties:
       error_code:
         example: 400
@@ -11,7 +11,7 @@ definitions:
         example: "2024-07-18T15:36:59Z"
         type: string
     type: object
-  models.UnauthorizedErrorResponse:
+  httputil.UnauthorizedErrorResponse:
     properties:
       error_code:
         example: 401
@@ -23,13 +23,22 @@ definitions:
         example: "2024-07-18T15:36:59Z"
         type: string
     type: object
-  models.UserAuthenticatedResponse:
+  httputil.UserAuthenticatedResponse:
     properties:
       token:
-        example: eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJleHBpcmVkIjogMTY5MDY1MDAwMCwgImlhdCI6IDE2ODk3OTMwMDB9.njvE5Lgs1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8
+        example: eyJhbGciOiAiSFMyNTeHBpcmVkIjogMTY5MDY1TMwMDB9.njvE5Lgs1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8
         type: string
       tokenType:
         example: Bearer
+        type: string
+    type: object
+  models.NewUserRequest:
+    properties:
+      confirmation_password:
+        type: string
+      email:
+        type: string
+      password:
         type: string
     type: object
   services.Credentials:
@@ -63,15 +72,70 @@ paths:
         "200":
           description: Success
           schema:
-            $ref: '#/definitions/models.UserAuthenticatedResponse'
+            $ref: '#/definitions/httputil.UserAuthenticatedResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/models.BadRequestErrorResponse'
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/models.UnauthorizedErrorResponse'
+            $ref: '#/definitions/httputil.UnauthorizedErrorResponse'
+        "500":
+          description: Internal Server Error
+      summary: Authenticate user
+      tags:
+      - Auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register an user by email and password
+      parameters:
+      - description: Email, Password and Password Confirmation
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/models.NewUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
+        "500":
+          description: Internal Server Error
+      summary: Register an user
+      tags:
+      - Auth
+  /verify:
+    get:
+      consumes:
+      - application/json
+      description: Verify user by email verification token
+      parameters:
+      - description: Email verification Token
+        in: query
+        name: Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.UnauthorizedErrorResponse'
         "500":
           description: Internal Server Error
       summary: Authenticate user
