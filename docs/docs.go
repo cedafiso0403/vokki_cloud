@@ -43,19 +43,103 @@ const docTemplate = `{
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/models.UserAuthenticatedResponse"
+                            "$ref": "#/definitions/httputil.UserAuthenticatedResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/models.BadRequestErrorResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/models.UnauthorizedErrorResponse"
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "description": "Register an user by email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register an user",
+                "parameters": [
+                    {
+                        "description": "Email, Password and Password Confirmation",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.NewUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/verify": {
+            "get": {
+                "description": "Verify user by email verification token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email verification Token",
+                        "name": "Token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
                         }
                     },
                     "500": {
@@ -66,7 +150,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.BadRequestErrorResponse": {
+        "httputil.BadRequestErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -83,7 +167,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UnauthorizedErrorResponse": {
+        "httputil.UnauthorizedErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -100,16 +184,30 @@ const docTemplate = `{
                 }
             }
         },
-        "models.UserAuthenticatedResponse": {
+        "httputil.UserAuthenticatedResponse": {
             "type": "object",
             "properties": {
                 "token": {
                     "type": "string",
-                    "example": "eyJhbGciOiAiSFMyNTYiLCAidHlwIjogIkpXVCJ9.eyJzdWIiOiAiMTIzNDU2Nzg5MCIsICJleHBpcmVkIjogMTY5MDY1MDAwMCwgImlhdCI6IDE2ODk3OTMwMDB9.njvE5Lgs1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8"
+                    "example": "eyJhbGciOiAiSFMyNTeHBpcmVkIjogMTY5MDY1TMwMDB9.njvE5Lgs1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8"
                 },
                 "tokenType": {
                     "type": "string",
                     "example": "Bearer"
+                }
+            }
+        },
+        "models.NewUserRequest": {
+            "type": "object",
+            "properties": {
+                "confirmation_password": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },

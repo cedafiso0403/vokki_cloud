@@ -7,10 +7,22 @@ import (
 	"time"
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/email"
+	"vokki_cloud/internal/httputil"
 	"vokki_cloud/internal/models"
 	"vokki_cloud/internal/utils"
 )
 
+// Register godoc
+// @Summary Register an user
+// @Description Register an user by email and password
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param User body models.NewUserRequest true "Email, Password and Password Confirmation"
+// @Success 200
+// @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /register [post]
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	timeNow := time.Now().UTC()
@@ -39,49 +51,49 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !newUser.IsValidEmail() {
-		errorResponse := models.BadRequestErrorResponse{
+		errorResponse := httputil.BadRequestErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Invalid email",
 		}
 
-		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	//! Add password validation -> To define
 
 	if newUser.Password != newUser.ConfirmationPassword {
-		errorResponse := models.BadRequestErrorResponse{
+		errorResponse := httputil.BadRequestErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Passwords do not match",
 		}
-		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	user, _ := models.GetUser(newUser.Email)
 
 	if user.Email != "" {
-		errorResponse := models.BadRequestErrorResponse{
+		errorResponse := httputil.BadRequestErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   "Email already in use",
 		}
-		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
 	userCreated, err := newUser.CreateUser()
 
 	if err != nil {
-		errorResponse := models.BadRequestErrorResponse{
+		errorResponse := httputil.BadRequestErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusInternalServerError,
 			Message:   "",
 		}
-		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
@@ -94,11 +106,23 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		email.SendVerificationEmail(userCreated, userJWT)
 	}
 
-	models.SuccessJsonResponse(w, map[string]string{
+	httputil.SuccessJsonResponse(w, map[string]string{
 		"message": "User created",
 	})
 }
 
+// Verify godoc
+// @Summary Authenticate user
+// @Description Verify user by email verification token
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Param        Token    query     string  true  "Email verification Token"
+// @Success 200
+// @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
+// @Failure 401 {object} httputil.UnauthorizedErrorResponse "Unauthorized"
+// @Failure 500 "Internal Server Error"
+// @Router /verify [get]
 func VerifyUser(w http.ResponseWriter, r *http.Request) {
 
 	timeNow := time.Now().UTC()
@@ -120,12 +144,12 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	err := models.ActivateUser(userID.(int64), token.(string))
 
 	if err != nil {
-		errorResponse := models.BadRequestErrorResponse{
+		errorResponse := httputil.UnauthorizedErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
 			Message:   err.Error(),
 		}
-		models.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
 		return
 	}
 
