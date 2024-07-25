@@ -1,17 +1,25 @@
 package models
 
 import (
-	"errors"
-	vokki_constants "vokki_cloud/internal/constants"
+	"database/sql"
+	"log"
+	"regexp"
 	"vokki_cloud/internal/database"
+	"vokki_cloud/internal/utils"
 )
 
 type User struct {
-	ID       int    `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Created  string `json:"created,omitempty"`
-	Updated  string `json:"updated,omitempty"`
+	ID        int    `json:"id" db:"id"`
+	Email     string `json:"email" db:"email"`
+	Password  string `json:"password" db:"password"`
+	CreatedAt string `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt string `json:"updated_at,omitempty" db:"updated_at"`
+}
+
+type NewUserRequest struct {
+	Email                string `json:"email"`
+	Password             string `json:"password"`
+	ConfirmationPassword string `json:"confirmation_password"`
 }
 
 func GetUser(email string) (User, error) {
@@ -29,7 +37,7 @@ func GetUser(email string) (User, error) {
 
 	defer preparedQuery.Close()
 
-	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.Created, &user.Email, &user.Updated)
+	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.CreatedAt, &user.Email, &user.UpdatedAt)
 
 	if err != nil {
 
@@ -39,61 +47,41 @@ func GetUser(email string) (User, error) {
 	return user, nil
 }
 
-func ActivateUser(userID int64, token string) error {
+func (newUser *NewUserRequest) CreateUser() (User, error) {
 
 	db := database.GetDB()
 
-	verificationToken := AuthToken{}
+	user := User{}
 
-	preparedTokenExistsQuery, err := db.Prepare("SELECT verification_token, revoked_at, token_type, user_id FROM user_tokens WHERE user_id=$1 AND verification_token=$2")
-
-	if err != nil {
-		return err
-	}
-
-	defer preparedTokenExistsQuery.Close()
-
-	err = preparedTokenExistsQuery.QueryRow(userID, token).Scan(&verificationToken.Token, &verificationToken.RevokedAt, &verificationToken.TokenType, &verificationToken.UserID)
+	preparedCreateUserQuery, err := db.Prepare("INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id, email")
 
 	if err != nil {
-		return err
+		log.Print("Error preparing create user: ", err)
+		return User{}, err
 	}
 
-	if verificationToken.RevokedAt.Valid {
-		return errors.New("token has been revoked")
-	}
+	defer preparedCreateUserQuery.Close()
 
-	if verificationToken.TokenType != vokki_constants.EmailToken {
-		return errors.New("invalid token type")
-	}
-
-	preparedUpdateTokenQuery, err := db.Prepare("UPDATE user_tokens SET revoked_at=$1 WHERE user_id=$2 AND verification_token=$3")
+	hashedPassword, err := utils.HashPassword(newUser.Password)
 
 	if err != nil {
-		return err
+		log.Print("Error hashing password: ", err)
+		return User{}, err
 	}
 
-	defer preparedUpdateTokenQuery.Close()
+	err = preparedCreateUserQuery.QueryRow(&newUser.Email, hashedPassword).Scan(&user.ID, &user.Email)
 
-	_, err = preparedUpdateTokenQuery.Exec("now()", userID, token)
-
-	if err != nil {
-		return err
+	if err != nil && err != sql.ErrNoRows {
+		log.Print("Error creating user: ", err)
+		return User{}, err
 	}
 
-	preparedActivateUserQuery, err := db.Prepare("UPDATE users SET activated=true WHERE id=$1")
-
-	if err != nil {
-		return err
-	}
-
-	defer preparedActivateUserQuery.Close()
-
-	_, err = preparedActivateUserQuery.Exec(userID)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return user, nil
 }
+
+func (user *NewUserRequest) IsValidEmail() bool {
+	var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	return emailRegex.MatchString(user.Email)
+}
+
+//! Missing is password valid

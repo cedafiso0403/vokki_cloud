@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-	"time"
 	"vokki_cloud/internal/auth_error"
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/models"
@@ -28,21 +27,10 @@ func authMiddleware(next http.Handler) http.Handler {
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
-		decodedToken, err := utils.ParseJWT(token)
+		decodedToken, err := utils.ValidateToken(token)
 
 		if err != nil {
-			http.Error(w, auth_error.ErrInvalidToken.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if !decodedToken.VerifyExpiresAt(time.Now().Unix(), true) {
-			http.Error(w, auth_error.ErrExpiredToken.Error(), http.StatusUnauthorized)
-			models.RevokeToken(token)
-			return
-		}
-
-		if !decodedToken.VerifyIssuer(vokki_constants.Issuer, true) {
-			http.Error(w, auth_error.ErrInvalidTokenIssuer.Error(), http.StatusUnauthorized)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 

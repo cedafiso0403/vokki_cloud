@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"time"
+	"vokki_cloud/internal/auth_error"
 	vokki_constants "vokki_cloud/internal/constants"
 
 	"github.com/dgrijalva/jwt-go"
@@ -22,7 +23,7 @@ func GenerateJWT(userID int64) (string, error) {
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
 			IssuedAt:  time.Now().Unix(),
-			Issuer:    vokki_constants.Issuer,
+			Issuer:    vokki_constants.TokenIssuer,
 		},
 	}
 
@@ -51,7 +52,22 @@ func ParseJWT(tokenString string) (*Claims, error) {
 	return &claims, nil
 }
 
-// func ValidateToken(tokenString string) (*Claims, error) {
-// 	// Validate JWT token
+func ValidateToken(tokenString string) (*Claims, error) {
 
-// }
+	decodedToken, err := ParseJWT(tokenString)
+
+	if err != nil {
+		return nil, auth_error.ErrInvalidToken
+	}
+
+	if !decodedToken.VerifyExpiresAt(time.Now().Unix(), true) {
+		return nil, auth_error.ErrExpiredToken
+	}
+
+	if !decodedToken.VerifyIssuer(vokki_constants.TokenIssuer, true) {
+		return nil, auth_error.ErrInvalidTokenIssuer
+	}
+
+	return decodedToken, nil
+
+}
