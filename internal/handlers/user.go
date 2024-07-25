@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 	vokki_constants "vokki_cloud/internal/constants"
-	"vokki_cloud/internal/email"
 	"vokki_cloud/internal/httputil"
 	"vokki_cloud/internal/models"
+	"vokki_cloud/internal/services"
 	"vokki_cloud/internal/utils"
 )
 
@@ -103,7 +103,7 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error generating JWT: ", err)
 	} else {
 		models.StoreToken(int64(userCreated.ID), userJWT, vokki_constants.EmailToken)
-		email.SendVerificationEmail(userCreated, userJWT)
+		services.SendVerificationEmail(userCreated, userJWT)
 	}
 
 	httputil.SuccessJsonResponse(w, map[string]string{
@@ -141,7 +141,7 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := models.ActivateUser(userID.(int64), token.(string))
+	err := services.ActivateUser(userID.(int64), token.(string))
 
 	if err != nil {
 		errorResponse := httputil.UnauthorizedErrorResponse{

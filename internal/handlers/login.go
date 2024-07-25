@@ -71,3 +71,57 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	httputil.SuccessJsonResponse(w, httputil.UserAuthenticatedResponse{Token: token, TokenType: "Bearer"})
 }
+
+// ResetPassword godoc
+// @Summary Reset password
+// @Description Resets the user's password using the provided reset token
+// @Tags auth
+// @Accept  json
+// @Produce  json
+// @Param request body ResetPasswordRequest true "Token and New Password"
+// @Success 200 {object} models.SuccessResponse "Password reset successful"
+// @Failure 400 {object} models.ErrorResponse "Bad Request"
+// @Router /reset-password [post]
+func RequestResetPassword(w http.ResponseWriter, r *http.Request) {
+
+	timeNow := time.Now().UTC()
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	newPasswordRequest := services.NewPasswordRequest{}
+
+	decoder := json.NewDecoder(r.Body)
+
+	decoder.DisallowUnknownFields()
+
+	err := decoder.Decode(&newPasswordRequest)
+
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	if newPasswordRequest.Password == "" || newPasswordRequest.ConfirmationPassword == "" || newPasswordRequest.Token == "" {
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Password and Email are required",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+
+	if newPasswordRequest.Password == "" || newPasswordRequest.ConfirmationPassword == "" {
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Password does not match confirmation password",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		return
+	}
+
+}
