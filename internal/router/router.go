@@ -16,6 +16,8 @@ func SetupRouter() *mux.Router {
 	// Serve Swagger documentation
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	r.HandleFunc(vokki_constants.RouteTermAndConditions, handlers.TermAndConditions).Methods("GET")
+
 	// Public routes
 	r.HandleFunc(vokki_constants.RouteLogin, handlers.Login).Methods("POST")
 	r.HandleFunc(vokki_constants.RouteRegister, handlers.RegisterUser).Methods("POST")
