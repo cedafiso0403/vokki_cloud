@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /opt/vokki_cloud
+
+hooks:
+  BeforeBlockTraffic:
+    - location: scripts/before_block_traffic.sh
+      timeout: 300
+      runas: root
