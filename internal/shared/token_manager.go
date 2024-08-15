@@ -1,6 +1,8 @@
 package shared
 
-import "sync"
+import (
+	"sync"
+)
 
 type TokenManager struct {
 	tokenMap sync.Map
