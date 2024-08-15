@@ -7,6 +7,7 @@ import (
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/database"
 	"vokki_cloud/internal/models"
+	"vokki_cloud/internal/shared"
 	"vokki_cloud/internal/utils"
 )
 
@@ -133,6 +134,12 @@ func RequestNewPasswordEmail(email string) error {
 	}
 
 	err = models.StoreToken(int64(user.ID), resetPasswordToken, vokki_constants.ResetPassword)
+
+	if err != nil {
+		return err
+	}
+
+	shared.GetTokenManager().AddToken(resetPasswordToken)
 
 	SendPasswordResetEmail(user, resetPasswordToken)
 
