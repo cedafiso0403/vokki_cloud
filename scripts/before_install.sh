@@ -19,3 +19,8 @@ export SUPABASE_API_KEY="${SUPABASE_API_KEY}"
 export DB_URL="${DB_URL}"
 export FROM_EMAIL="${FROM_EMAIL}"
 export FROM_EMAIL_PASSWORD="${FROM_EMAIL_PASSWORD}"
+
+echo "Environment variables set"
+
+rm /opt/vokki_cloud/app.log
+
