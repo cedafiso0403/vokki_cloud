@@ -41,6 +41,5 @@ export FROM_EMAIL_PASSWORD="${FROM_EMAIL_PASSWORD}"
 
 echo "Environment variables set"
 
-# Remove old log file
-[ -f /opt/vokki_cloud/app.log ] && rm /opt/vokki_cloud/app.log
+echo "Before Install Script complete."
 
