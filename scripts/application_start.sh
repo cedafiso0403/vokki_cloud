@@ -20,7 +20,7 @@ else
 fi
 
 
-nohup go run ./cmd/main.go
+nohup go run ./cmd/main.go > /dev/null 2>&1 &
 
 
 echo "Application Start Script Completed"
