@@ -5,7 +5,13 @@ files:
     destination: /opt/vokki_cloud
 
 hooks:
-  BeforeBlockTraffic:
-    - location: scripts/before_block_traffic.sh
+  BeforeInstall:
+    - location: scripts/before_install.sh
       timeout: 300
       runas: root
+  Install:
+    - location: scripts/install.sh
+      timeout: 300
+  ApplicationStart:
+    - location: scripts/application_start.sh
+      timeout: 300
