@@ -4,3 +4,4 @@ cd /opt/vokki_cloud
 
 go --version | echo
 
+
