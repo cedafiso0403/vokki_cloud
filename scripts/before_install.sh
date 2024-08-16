@@ -1,5 +1,7 @@
 echo "Starting Before Install Script..."
 
+sudo yum install jq -y
+
 # Check if Go is installed
 if ! command -v go &> /dev/null
 then
@@ -13,6 +15,9 @@ else
     echo "Go is already installed."
 fi
 
+
+
+
 # Kill any existing Go processes
 PID=$(ps aux | awk '/\/tmp\/go-/' | sed -n 's/  */ /gp' | cut -d ' ' -f 2)
 if [ -n "$PID" ]; then
@@ -23,10 +28,10 @@ else
 fi
 
 # Fetch secrets from AWS Secrets Manager
-SUPABASE_API_KEY=$(aws secretsmanager get-secret-value --secret-id SUPABASE_API_KEY --query 'SecretString' --output text)
-DB_URL=$(aws secretsmanager get-secret-value --secret-id DB_URL --query 'SecretString' --output text)
-FROM_EMAIL=$(aws secretsmanager get-secret-value --secret-id FROM_EMAIL --query 'SecretString' --output text)
-FROM_EMAIL_PASSWORD=$(aws secretsmanager get-secret-value --secret-id FROM_EMAIL_PASSWORD --query 'SecretString' --output text)
+SUPABASE_API_KEY=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.SUPABASE_API_KEY')
+DB_URL=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.DB_URL')
+FROM_EMAIL=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL')
+FROM_EMAIL_PASSWORD=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL_PASSWORD')
 
 # Set environment variables
 export SUPABASE_API_KEY="${SUPABASE_API_KEY}"
