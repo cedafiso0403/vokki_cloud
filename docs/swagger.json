@@ -1,10 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is the API for Vokki mobile app",
-        "title": "Vokki Cloud API",
-        "contact": {},
-        "version": "1.0"
+        "contact": {}
     },
     "paths": {
         "/login": {
@@ -27,7 +24,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.Credentials"
+                            "$ref": "#/definitions/vokki_cloud_internal_services.Credentials"
                         }
                     }
                 ],
@@ -35,19 +32,19 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/httputil.UserAuthenticatedResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UserAuthenticatedResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UnauthorizedErrorResponse"
                         }
                     },
                     "500": {
@@ -76,7 +73,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.NewUserRequest"
+                            "$ref": "#/definitions/vokki_cloud_internal_models.NewUserRequest"
                         }
                     }
                 ],
@@ -87,11 +84,51 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/reset-password": {
+            "post": {
+                "description": "Resets the user's password using the provided reset token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Reset password",
+                "parameters": [
+                    {
+                        "description": "User Email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UserAuthenticatedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
+                        }
                     }
                 }
             }
@@ -125,13 +162,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UnauthorizedErrorResponse"
                         }
                     },
                     "500": {
@@ -142,7 +179,7 @@
         }
     },
     "definitions": {
-        "httputil.BadRequestErrorResponse": {
+        "vokki_cloud_internal_httputil.BadRequestErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -159,7 +196,7 @@
                 }
             }
         },
-        "httputil.UnauthorizedErrorResponse": {
+        "vokki_cloud_internal_httputil.UnauthorizedErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -176,7 +213,7 @@
                 }
             }
         },
-        "httputil.UserAuthenticatedResponse": {
+        "vokki_cloud_internal_httputil.UserAuthenticatedResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -189,7 +226,7 @@
                 }
             }
         },
-        "models.NewUserRequest": {
+        "vokki_cloud_internal_models.NewUserRequest": {
             "type": "object",
             "properties": {
                 "confirmation_password": {
@@ -203,7 +240,7 @@
                 }
             }
         },
-        "services.Credentials": {
+        "vokki_cloud_internal_services.Credentials": {
             "type": "object",
             "properties": {
                 "email": {

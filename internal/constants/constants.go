@@ -19,9 +19,11 @@ const (
 
 // Routes
 const (
-	RouteLogin         = "/login"
-	RouteRegister      = "/register"
-	RouteVerifyEmail   = "/verify"
-	RouteResetPassword = "/reset-password"
-	RouteAlive         = "/alive"
+	RouteLogin             = "/login"
+	RouteRegister          = "/register"
+	RouteVerifyEmail       = "/verify"
+	RouteResetPassword     = "/reset-password"
+	RouteAlive             = "/alive"
+	RouteTermAndConditions = "/terms-and-conditions"
+	RouteCreateNewPassword = "/create-new-password"
 )
