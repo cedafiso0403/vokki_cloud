@@ -16,10 +16,13 @@ func SetupRouter() *mux.Router {
 	// Serve Swagger documentation
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
+	r.HandleFunc(vokki_constants.RouteTermAndConditions, handlers.TermAndConditions).Methods("GET")
+
 	// Public routes
 	r.HandleFunc(vokki_constants.RouteLogin, handlers.Login).Methods("POST")
 	r.HandleFunc(vokki_constants.RouteRegister, handlers.RegisterUser).Methods("POST")
 	r.HandleFunc(vokki_constants.RouteVerifyEmail, middleware.EmailVerificationMiddleware(http.HandlerFunc(handlers.VerifyUser))).Methods("GET")
+	r.HandleFunc(vokki_constants.RouteResetPassword, handlers.RequestResetPassword).Methods("POST")
 
 	// API routes with prefix /api/v1
 	apiRouter := r.PathPrefix("/api/v1").Subrouter()

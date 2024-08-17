@@ -17,9 +17,9 @@ type User struct {
 }
 
 type NewUserRequest struct {
-	Email                string `json:"email"`
-	Password             string `json:"password"`
-	ConfirmationPassword string `json:"confirmation_password"`
+	Email                string `json:"email" binding:"required" example:"user@domain.com"`
+	Password             string `json:"password" binding:"required" example:"password"`
+	ConfirmationPassword string `json:"confirmation_password" binding:"required" example:"password"`
 }
 
 func GetUser(email string) (User, error) {
