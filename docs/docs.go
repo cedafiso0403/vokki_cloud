@@ -104,6 +104,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/reset-password": {
+            "post": {
+                "description": "Send email with token to reset password if user exists, is active and is not using provider authentication, otherwise does nothing",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Reset password",
+                "parameters": [
+                    {
+                        "description": "User Email",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.NewPasswordEmailRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/verify": {
             "get": {
                 "description": "Verify user by email verification token",
@@ -199,15 +239,23 @@ const docTemplate = `{
         },
         "models.NewUserRequest": {
             "type": "object",
+            "required": [
+                "confirmation_password",
+                "email",
+                "password"
+            ],
             "properties": {
                 "confirmation_password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@domain.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 }
             }
         },
@@ -215,10 +263,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@domain.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
+                }
+            }
+        },
+        "services.NewPasswordEmailRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@domain.com"
                 }
             }
         }
@@ -227,12 +289,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
+	Version:          "",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Vokki Cloud API",
-	Description:      "This is the API for Vokki mobile app",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
