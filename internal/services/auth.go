@@ -7,18 +7,23 @@ import (
 	vokki_constants "vokki_cloud/internal/constants"
 	"vokki_cloud/internal/database"
 	"vokki_cloud/internal/models"
+	"vokki_cloud/internal/shared"
 	"vokki_cloud/internal/utils"
 )
 
 type Credentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" example:"user@domain.com"`
+	Password string `json:"password" example:"password"`
+}
+
+type NewPasswordEmailRequest struct {
+	Email string `json:"email" binding:"required" example:"user@domain.com"`
 }
 
 type NewPasswordRequest struct {
-	Password             string `json:"password"`
-	ConfirmationPassword string `json:"confirmation_password"`
-	Token                string `json:"token"`
+	Password             string `json:"password" binding:"required" example:"password"`
+	ConfirmationPassword string `json:"confirmation_password" binding:"required" example:"password"`
+	Token                string `json:"token" binding:"required" example:"eyJhbGciOiAiSFMyNTeHBpcmVk1fjr-mL6l7QJbdFfL86D4HK4XsEFPfSb2X8"`
 }
 
 func Authenticate(credentials Credentials) (int, string, error) {
@@ -101,4 +106,43 @@ func ActivateUser(userID int64, token string) error {
 	}
 
 	return nil
+}
+
+func RequestNewPasswordEmail(email string) error {
+	db := database.GetDB()
+
+	user := models.User{}
+
+	preparedQuery, err := db.Prepare("SELECT id, email FROM users WHERE email=$1")
+
+	if err != nil {
+		return err
+	}
+
+	defer preparedQuery.Close()
+
+	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	resetPasswordToken, err := utils.GenerateJWT(int64(user.ID))
+
+	if err != nil {
+		return err
+	}
+
+	err = models.StoreToken(int64(user.ID), resetPasswordToken, vokki_constants.ResetPassword)
+
+	if err != nil {
+		return err
+	}
+
+	shared.GetTokenManager().AddToken(resetPasswordToken)
+
+	SendPasswordResetEmail(user, resetPasswordToken)
+
+	return nil
+
 }

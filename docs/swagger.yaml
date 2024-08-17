@@ -35,24 +35,38 @@ definitions:
   models.NewUserRequest:
     properties:
       confirmation_password:
+        example: password
         type: string
       email:
+        example: user@domain.com
         type: string
       password:
+        example: password
         type: string
+    required:
+    - confirmation_password
+    - email
+    - password
     type: object
   services.Credentials:
     properties:
       email:
+        example: user@domain.com
         type: string
       password:
+        example: password
         type: string
+    type: object
+  services.NewPasswordEmailRequest:
+    properties:
+      email:
+        example: user@domain.com
+        type: string
+    required:
+    - email
     type: object
 info:
   contact: {}
-  description: This is the API for Vokki mobile app
-  title: Vokki Cloud API
-  version: "1.0"
 paths:
   /login:
     post:
@@ -110,6 +124,33 @@ paths:
         "500":
           description: Internal Server Error
       summary: Register an user
+      tags:
+      - Auth
+  /reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Send email with token to reset password if user exists, is active
+        and is not using provider authentication, otherwise does nothing
+      parameters:
+      - description: User Email
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/services.NewPasswordEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
+        "500":
+          description: Internal Server Error
+      summary: Reset password
       tags:
       - Auth
   /verify:

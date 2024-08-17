@@ -53,7 +53,7 @@ func StoreToken(userID int64, token string, tokenType vokki_constants.TokenType)
 		return errors.New("")
 	}
 
-	log.Println("Token inserted")
+	log.Printf("Token inserted %s \n", tokenType)
 
 	shared.GetTokenManager().AddToken(token)
 
