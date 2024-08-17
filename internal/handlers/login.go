@@ -46,7 +46,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Status:    http.StatusBadRequest,
 			Message:   "Password and Email are required",
 		}
-		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -58,7 +58,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Status:    http.StatusBadRequest,
 			Message:   "Incorrect Password or Email",
 		}
-		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -74,13 +74,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 // ResetPassword godoc
 // @Summary Reset password
-// @Description Resets the user's password using the provided reset token
-// @Tags auth
+// @Description Send email with token to reset password if user exists, is active and is not using provider authentication, otherwise does nothing
+// @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Param request body ResetPasswordRequest true "Token and New Password"
-// @Success 200 {object} models.SuccessResponse "Password reset successful"
-// @Failure 400 {object} models.ErrorResponse "Bad Request"
+// @Param request body services.NewPasswordEmailRequest true "User Email"
+// @Success 200
+// @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
+// @Failure 500 "Internal Server Error"
 // @Router /reset-password [post]
 func RequestResetPassword(w http.ResponseWriter, r *http.Request) {
 
@@ -91,37 +92,36 @@ func RequestResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newPasswordRequest := services.NewPasswordRequest{}
+	var userEmail services.NewPasswordEmailRequest
 
 	decoder := json.NewDecoder(r.Body)
 
 	decoder.DisallowUnknownFields()
 
-	err := decoder.Decode(&newPasswordRequest)
+	err := decoder.Decode(&userEmail)
 
 	if err != nil {
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	if newPasswordRequest.Password == "" || newPasswordRequest.ConfirmationPassword == "" || newPasswordRequest.Token == "" {
+	if userEmail.Email == "" {
 		errorResponse := httputil.BadRequestErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
 			Status:    http.StatusBadRequest,
-			Message:   "Password and Email are required",
+			Message:   "Email is required",
 		}
-		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
-	if newPasswordRequest.Password == "" || newPasswordRequest.ConfirmationPassword == "" {
-		errorResponse := httputil.BadRequestErrorResponse{
-			Timestamp: utils.FormatDate(timeNow),
-			Status:    http.StatusBadRequest,
-			Message:   "Password does not match confirmation password",
-		}
-		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
+	err = services.RequestNewPasswordEmail(userEmail.Email)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.Write([]byte(""))
 
 }
