@@ -48,6 +48,21 @@ definitions:
     - email
     - password
     type: object
+  models.UserProfile:
+    properties:
+      email:
+        example: user@domain.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      id:
+        example: 1
+        type: integer
+      last_name:
+        example: Doe
+        type: string
+    type: object
   services.Credentials:
     properties:
       email:
@@ -153,6 +168,31 @@ paths:
       summary: Reset password
       tags:
       - Auth
+  /user:
+    get:
+      description: Return profile for authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User Profile
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.UnauthorizedErrorResponse'
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Get user profile
+      tags:
+      - User
   /verify:
     get:
       consumes:
