@@ -29,16 +29,16 @@ else
 fi
 
 # Fetch secrets from AWS Secrets Manager
-SUPABASE_API_KEY=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.SUPABASE_API_KEY')
-DB_URL=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.DB_URL')
-FROM_EMAIL=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL')
-FROM_EMAIL_PASSWORD=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL_PASSWORD')
+SUPABASE_API_KEY_SCRIPT=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.SUPABASE_API_KEY')
+DB_URL_SCRIPT=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.DB_URL')
+FROM_EMAIL_SCRIPT=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL')
+FROM_EMAIL_PASSWORD_SCRIPT=$(aws secretsmanager get-secret-value --secret-id prod/vokki_cloud --query "SecretString" --output text | jq -r '.FROM_EMAIL_PASSWORD')
 
 # Set environment variables
-export SUPABASE_API_KEY="${SUPABASE_API_KEY}"
-export DB_URL="${DB_URL}"
-export FROM_EMAIL="${FROM_EMAIL}"
-export FROM_EMAIL_PASSWORD="${FROM_EMAIL_PASSWORD}"
+export SUPABASE_API_KEY="${SUPABASE_API_KEY_SCRIPT}"
+export DB_URL="${DB_URL_SCRIPT}"
+export FROM_EMAIL="${FROM_EMAIL_SCRIPT}"
+export FROM_EMAIL_PASSWORD="${FROM_EMAIL_PASSWORD_SCRIPT}"
 
 echo "Environment variables set"
 
