@@ -22,22 +22,18 @@ type NewUserRequest struct {
 	ConfirmationPassword string `json:"confirmation_password" binding:"required" example:"password"`
 }
 
+type UserProfile struct {
+	ID        int    `json:"id" db:"id" example:"1"`
+	Email     string `json:"email" db:"email" example:"user@domain.com"`
+	FirstName string `json:"first_name" db:"first_name" example:"John"`
+	LastName  string `json:"last_name" db:"last_name" example:"Doe"`
+}
+
 func GetUser(email string) (User, error) {
 
-	db := database.GetDB()
+	user := User{}
 
-	var user = User{}
-
-	preparedQuery, err := db.Prepare("SELECT id, created_at, email, updated_at FROM users WHERE email=$1")
-
-	if err != nil {
-
-		return user, err
-	}
-
-	defer preparedQuery.Close()
-
-	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.CreatedAt, &user.Email, &user.UpdatedAt)
+	err := database.GetPreparedGetUserQuery().QueryRow(email).Scan(&user.ID, &user.CreatedAt, &user.Email, &user.UpdatedAt)
 
 	if err != nil {
 
@@ -49,18 +45,7 @@ func GetUser(email string) (User, error) {
 
 func (newUser *NewUserRequest) CreateUser() (User, error) {
 
-	db := database.GetDB()
-
 	user := User{}
-
-	preparedCreateUserQuery, err := db.Prepare("INSERT INTO users (email, hashed_password) VALUES ($1, $2) RETURNING id, email")
-
-	if err != nil {
-		log.Print("Error preparing create user: ", err)
-		return User{}, err
-	}
-
-	defer preparedCreateUserQuery.Close()
 
 	hashedPassword, err := utils.HashPassword(newUser.Password)
 
@@ -69,7 +54,7 @@ func (newUser *NewUserRequest) CreateUser() (User, error) {
 		return User{}, err
 	}
 
-	err = preparedCreateUserQuery.QueryRow(&newUser.Email, hashedPassword).Scan(&user.ID, &user.Email)
+	err = database.GetPreparedCreateUserQuery().QueryRow(&newUser.Email, hashedPassword).Scan(&user.ID, &user.Email)
 
 	if err != nil && err != sql.ErrNoRows {
 		log.Print("Error creating user: ", err)
@@ -85,3 +70,21 @@ func (user *NewUserRequest) IsValidEmail() bool {
 }
 
 //! Missing is password valid
+
+func GetUserProfile(userID int64) (UserProfile, error) {
+
+	var userProfile = UserProfile{}
+
+	var firstName, lastName sql.NullString
+
+	err := database.GetPreparedGetUserProfile().QueryRow(userID).Scan(&userProfile.ID, &userProfile.Email, &firstName, &lastName)
+
+	if err != nil && err != sql.ErrNoRows {
+		return userProfile, err
+	}
+
+	userProfile.FirstName = utils.ConvertNullString(firstName)
+	userProfile.LastName = utils.ConvertNullString(lastName)
+
+	return userProfile, nil
+}

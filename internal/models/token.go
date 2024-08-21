@@ -20,18 +20,9 @@ func StoreToken(userID int64, token string, tokenType vokki_constants.TokenType)
 
 	db := database.GetDB()
 
-	prepareCurrentTokenQuery, err := db.Prepare("UPDATE user_tokens set revoked_at = now() WHERE user_id=$1 AND token_type=$2 AND revoked_at IS NULL RETURNING verification_token")
-
-	if err != nil {
-		log.Println("Error preparing current token query: ", err)
-		return errors.New("")
-	}
-
-	defer prepareCurrentTokenQuery.Close()
-
 	oldtoken := AuthToken{}
 
-	err = prepareCurrentTokenQuery.QueryRow(userID, tokenType).Scan(&oldtoken.Token)
+	err := database.GetPreparedCurrentTokenQuery().QueryRow(userID, tokenType).Scan(&oldtoken.Token)
 
 	if err != nil && err != sql.ErrNoRows {
 		log.Println("Error querying current token: ", err)
@@ -46,6 +37,7 @@ func StoreToken(userID int64, token string, tokenType vokki_constants.TokenType)
 
 	shared.GetTokenManager().RemoveToken(oldtoken.Token)
 
+	//! Make it a prepared statement
 	_, err = db.Exec("INSERT INTO user_tokens (user_id, verification_token, token_type) VALUES ($1, $2, $3)", userID, token, tokenType)
 
 	if err != nil {
@@ -62,18 +54,9 @@ func StoreToken(userID int64, token string, tokenType vokki_constants.TokenType)
 
 func VerifyToken(token string) bool {
 
-	db := database.GetDB()
-
 	var count int
 
-	preparedTokenExistsQuery, err := db.Prepare("SELECT COUNT(*) FROM user_tokens WHERE verification_token=$1 AND revoked_at IS NULL")
-
-	if err != nil {
-		log.Println("Error preparing query for verifying token: ", err)
-		return false
-	}
-
-	err = preparedTokenExistsQuery.QueryRow(token).Scan(&count)
+	err := database.GetPreparedTokenExistsQuery().QueryRow(token).Scan(&count)
 
 	if err != nil {
 		log.Println("Error verifying token: ", err)
@@ -89,18 +72,7 @@ func VerifyToken(token string) bool {
 
 func RevokeToken(token string) error {
 
-	db := database.GetDB()
-
-	prepareCurrentTokenQuery, err := db.Prepare("UPDATE user_tokens set revoked_at = now() WHERE verification_token=$1 AND revoked_at IS NULL")
-
-	if err != nil {
-		log.Println("Error preparing query to revoke token: ", err)
-		return errors.New("")
-	}
-
-	defer prepareCurrentTokenQuery.Close()
-
-	_, err = prepareCurrentTokenQuery.Exec(token)
+	_, err := database.GetPreparedCurrentTokenQuery().Exec(token)
 
 	if err != nil {
 		log.Println("Error revoking token: ", err)
