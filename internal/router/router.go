@@ -13,22 +13,31 @@ import (
 func SetupRouter() *mux.Router {
 	r := mux.NewRouter()
 
+	r.HandleFunc(vokki_constants.RouteLandingPage, handlers.LandingPage).Methods("GET")
+	r.HandleFunc(vokki_constants.RouteTermAndConditions, handlers.TermAndConditions).Methods("GET")
+
 	// Serve Swagger documentation
 	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	r.HandleFunc(vokki_constants.RouteTermAndConditions, handlers.TermAndConditions).Methods("GET")
+	// API routes with prefix /api/v1
+	apiRouterPublic := r.PathPrefix("/api/v1").Subrouter()
+	apiRouterPrivate := r.PathPrefix("/api/v1").Subrouter()
+
+	apiRouterPrivate.Use(middleware.AuthMiddleware)
 
 	// Public routes
-	r.HandleFunc(vokki_constants.RouteLogin, handlers.Login).Methods("POST")
-	r.HandleFunc(vokki_constants.RouteRegister, handlers.RegisterUser).Methods("POST")
-	r.HandleFunc(vokki_constants.RouteVerifyEmail, middleware.EmailVerificationMiddleware(http.HandlerFunc(handlers.VerifyUser))).Methods("GET")
-	r.HandleFunc(vokki_constants.RouteResetPassword, handlers.RequestResetPassword).Methods("POST")
+	apiRouterPublic.HandleFunc(vokki_constants.RouteLogin, handlers.Login).Methods("POST")
+	apiRouterPublic.HandleFunc(vokki_constants.RouteRegister, handlers.RegisterUser).Methods("POST")
+	apiRouterPublic.HandleFunc(vokki_constants.RouteVerifyEmail, middleware.EmailVerificationMiddleware(http.HandlerFunc(handlers.VerifyUser))).Methods("GET")
+	apiRouterPublic.HandleFunc(vokki_constants.RouteResetPassword, handlers.RequestResetPassword).Methods("POST")
 
-	// API routes with prefix /api/v1
-	apiRouter := r.PathPrefix("/api/v1").Subrouter()
-	apiRouter.HandleFunc(vokki_constants.RouteAlive, func(w http.ResponseWriter, r *http.Request) {
+	apiRouterPublic.HandleFunc(vokki_constants.RouteAlive, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}).Methods("GET")
+
+	// Private routes
+
+	apiRouterPrivate.HandleFunc(vokki_constants.RouteUser, handlers.GetUser).Methods("GET")
 
 	return r
 }

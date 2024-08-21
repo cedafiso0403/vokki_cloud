@@ -144,6 +144,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Return profile for authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user profile",
+                "responses": {
+                    "200": {
+                        "description": "User Profile",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserProfile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/verify": {
             "get": {
                 "description": "Verify user by email verification token",
@@ -256,6 +296,27 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "password"
+                }
+            }
+        },
+        "models.UserProfile": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@domain.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
                 }
             }
         },
