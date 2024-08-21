@@ -2,7 +2,6 @@ echo "Application Start Script..."
 
 cd /opt/vokki_cloud
 
-
 # Check if Go is installed
 if ! command -v go &> /dev/null
 then
@@ -18,6 +17,8 @@ then
 else
     echo "Go is already installed."
 fi
+
+echo $DB_URL
 
 
 nohup go run ./cmd/main.go > /dev/null 2>&1 &
