@@ -156,3 +156,43 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(""))
 
 }
+
+// Verify godoc
+// @Summary Get user profile
+// @Description Return profile for authenticated user
+// @Tags User
+// @Produce  json
+// @Security BearerAuth
+// @Success 200 {object} models.UserProfile "User Profile"
+// @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
+// @Failure 401 {object} httputil.UnauthorizedErrorResponse "Unauthorized"
+// @Failure 500 "Internal Server Error"
+// @Router /user [get]
+func GetUser(w http.ResponseWriter, r *http.Request) {
+
+	timeNow := time.Now().UTC()
+
+	userID := r.Context().Value(vokki_constants.UserIDKey)
+
+	if userID == 0 || userID == nil {
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "User ID not found",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
+		return
+	}
+
+	user, err := models.GetUserProfile(userID.(int64))
+
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	httputil.SuccessJsonResponse(w, map[string]any{
+		"data":       user,
+		"time_stamp": utils.FormatDate(timeNow),
+	})
+}
