@@ -51,19 +51,9 @@ func Authenticate(credentials Credentials) (int, string, error) {
 
 func ActivateUser(userID int64, token string) error {
 
-	db := database.GetDB()
-
 	verificationToken := models.AuthToken{}
 
-	preparedTokenExistsQuery, err := db.Prepare("SELECT verification_token, revoked_at, token_type, user_id FROM user_tokens WHERE user_id=$1 AND verification_token=$2")
-
-	if err != nil {
-		return err
-	}
-
-	defer preparedTokenExistsQuery.Close()
-
-	err = preparedTokenExistsQuery.QueryRow(userID, token).Scan(&verificationToken.Token, &verificationToken.RevokedAt, &verificationToken.TokenType, &verificationToken.UserID)
+	err := database.GetPreparedTokenExistsQuery().QueryRow(userID, token).Scan(&verificationToken.Token, &verificationToken.RevokedAt, &verificationToken.TokenType, &verificationToken.UserID)
 
 	if err != nil {
 		return err
@@ -77,29 +67,12 @@ func ActivateUser(userID int64, token string) error {
 		return errors.New("invalid token type")
 	}
 
-	preparedUpdateTokenQuery, err := db.Prepare("UPDATE user_tokens SET revoked_at=$1 WHERE user_id=$2 AND verification_token=$3")
+	_, err = database.GetPreparedUpdateTokenQuery().Exec("now()", userID, token)
 
 	if err != nil {
 		return err
 	}
-
-	defer preparedUpdateTokenQuery.Close()
-
-	_, err = preparedUpdateTokenQuery.Exec("now()", userID, token)
-
-	if err != nil {
-		return err
-	}
-
-	preparedActivateUserQuery, err := db.Prepare("UPDATE users SET activated=true WHERE id=$1")
-
-	if err != nil {
-		return err
-	}
-
-	defer preparedActivateUserQuery.Close()
-
-	_, err = preparedActivateUserQuery.Exec(userID)
+	_, err = database.GetPreparedActivateUserQuery().Exec(userID)
 
 	if err != nil {
 		return err
@@ -109,19 +82,10 @@ func ActivateUser(userID int64, token string) error {
 }
 
 func RequestNewPasswordEmail(email string) error {
-	db := database.GetDB()
 
 	user := models.User{}
 
-	preparedQuery, err := db.Prepare("SELECT id, email FROM users WHERE email=$1")
-
-	if err != nil {
-		return err
-	}
-
-	defer preparedQuery.Close()
-
-	err = preparedQuery.QueryRow(email).Scan(&user.ID, &user.Email)
+	err := database.GetPreparedGetUserEmailQuery().QueryRow(email).Scan(&user.ID, &user.Email)
 
 	if err != nil {
 		return err
