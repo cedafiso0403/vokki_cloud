@@ -26,4 +26,6 @@ const (
 	RouteAlive             = "/alive"
 	RouteTermAndConditions = "/terms-and-conditions"
 	RouteCreateNewPassword = "/create-new-password"
+	RouteLandingPage       = "/"
+	RouteUser              = "/user"
 )
