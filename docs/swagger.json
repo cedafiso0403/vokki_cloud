@@ -24,7 +24,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_services.Credentials"
+                            "$ref": "#/definitions/services.Credentials"
                         }
                     }
                 ],
@@ -32,19 +32,19 @@
                     "200": {
                         "description": "Success",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UserAuthenticatedResponse"
+                            "$ref": "#/definitions/httputil.UserAuthenticatedResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UnauthorizedErrorResponse"
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
                         }
                     },
                     "500": {
@@ -73,7 +73,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_models.NewUserRequest"
+                            "$ref": "#/definitions/models.NewUserRequest"
                         }
                     }
                 ],
@@ -84,7 +84,7 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
                         }
                     },
                     "500": {
@@ -95,7 +95,7 @@
         },
         "/reset-password": {
             "post": {
-                "description": "Resets the user's password using the provided reset token",
+                "description": "Send email with token to reset password if user exists, is active and is not using provider authentication, otherwise does nothing",
                 "consumes": [
                     "application/json"
                 ],
@@ -103,7 +103,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "auth"
+                    "Auth"
                 ],
                 "summary": "Reset password",
                 "parameters": [
@@ -113,22 +113,62 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/services.NewPasswordEmailRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UserAuthenticatedResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
+        "/user": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Return profile for authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user profile",
+                "responses": {
+                    "200": {
+                        "description": "User Profile",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserProfile"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -162,13 +202,13 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.BadRequestErrorResponse"
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/vokki_cloud_internal_httputil.UnauthorizedErrorResponse"
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
                         }
                     },
                     "500": {
@@ -179,7 +219,7 @@
         }
     },
     "definitions": {
-        "vokki_cloud_internal_httputil.BadRequestErrorResponse": {
+        "httputil.BadRequestErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -196,7 +236,7 @@
                 }
             }
         },
-        "vokki_cloud_internal_httputil.UnauthorizedErrorResponse": {
+        "httputil.UnauthorizedErrorResponse": {
             "type": "object",
             "properties": {
                 "error_code": {
@@ -213,7 +253,7 @@
                 }
             }
         },
-        "vokki_cloud_internal_httputil.UserAuthenticatedResponse": {
+        "httputil.UserAuthenticatedResponse": {
             "type": "object",
             "properties": {
                 "token": {
@@ -226,28 +266,71 @@
                 }
             }
         },
-        "vokki_cloud_internal_models.NewUserRequest": {
+        "models.NewUserRequest": {
             "type": "object",
+            "required": [
+                "confirmation_password",
+                "email",
+                "password"
+            ],
             "properties": {
                 "confirmation_password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@domain.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 }
             }
         },
-        "vokki_cloud_internal_services.Credentials": {
+        "models.UserProfile": {
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "user@domain.com"
+                },
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
+                }
+            }
+        },
+        "services.Credentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@domain.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
+                }
+            }
+        },
+        "services.NewPasswordEmailRequest": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "user@domain.com"
                 }
             }
         }
