@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func LoadConfig() (*http.Server, *os.File, error) {
@@ -20,10 +22,10 @@ func LoadConfig() (*http.Server, *os.File, error) {
 	log.SetOutput(multiWriter)
 
 	// Load environment variables from .env file
-	// if err := godotenv.Load(); err != nil {
-	// 	log.Printf("Error loading .env file: %v", err)
-	// 	return nil, nil, err
-	// }
+	if err := godotenv.Load(); err != nil {
+		log.Printf("Error loading .env file: %v", err)
+		return nil, nil, err
+	}
 
 	log.Println("Successfully loaded .env file")
 
