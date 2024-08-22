@@ -48,6 +48,15 @@ definitions:
     - email
     - password
     type: object
+  models.UpdateUserProfileRequest:
+    properties:
+      first_name:
+        example: John
+        type: string
+      last_name:
+        example: Doe
+        type: string
+    type: object
   models.UserProfile:
     properties:
       email:
@@ -150,7 +159,7 @@ paths:
       parameters:
       - description: User Email
         in: body
-        name: request
+        name: message
         required: true
         schema:
           $ref: '#/definitions/services.NewPasswordEmailRequest'
@@ -191,6 +200,38 @@ paths:
       security:
       - BearerAuth: []
       summary: Get user profile
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update profile for authenticated user
+      parameters:
+      - description: First Name and Last Name
+        in: body
+        name: User
+        schema:
+          $ref: '#/definitions/models.UpdateUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User Profile
+          schema:
+            $ref: '#/definitions/models.UserProfile'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/httputil.BadRequestErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httputil.UnauthorizedErrorResponse'
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Update user profile
       tags:
       - User
   /verify:

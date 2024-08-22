@@ -36,8 +36,9 @@ func SetupRouter() *mux.Router {
 	}).Methods("GET")
 
 	// Private routes
-
+	// User routes
 	apiRouterPrivate.HandleFunc(vokki_constants.RouteUser, handlers.GetUser).Methods("GET")
+	apiRouterPrivate.HandleFunc(vokki_constants.RouteUser, handlers.UpdateUser).Methods("PUT")
 
 	return r
 }
