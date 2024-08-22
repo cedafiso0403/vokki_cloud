@@ -16,6 +16,7 @@ var (
 	preparedActivateUserQuery *sql.Stmt
 	preparedGetUserEmailQuery *sql.Stmt
 	preparedGetUserProfile    *sql.Stmt
+	preparedUpdateUserProfile *sql.Stmt
 )
 
 func Connect() {
@@ -25,6 +26,12 @@ func Connect() {
 
 	if err != nil {
 		log.Fatal("Cannot connect to the database: ", err)
+	}
+
+	_, err = db.Exec("DEALLOCATE ALL")
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	log.Println("Connected to the database")
@@ -82,6 +89,11 @@ func initPreparedStatements() error {
 
 	if preparedGetUserProfile, err = db.Prepare("SELECT users.id, users.email, user_profiles.first_name, user_profiles.last_name FROM users INNER JOIN user_profiles ON users.id = user_profiles.user_id WHERE users.id=$1"); err != nil {
 		log.Println("Error preparing get user profile query: ", err)
+		return err
+	}
+
+	if preparedUpdateUserProfile, err = db.Prepare("WITH updated AS (UPDATE user_profiles SET first_name = COALESCE($1, first_name), last_name = COALESCE($2, last_name) WHERE user_id = $3 RETURNING user_id, first_name, last_name) SELECT users.id, users.email, updated.first_name, updated.last_name FROM users INNER JOIN updated ON users.id = updated.user_id WHERE users.id = $3"); err != nil {
+		log.Println("Error preparing update user profile query: ", err)
 		return err
 	}
 
@@ -159,4 +171,8 @@ func GetPreparedGetUserEmailQuery() *sql.Stmt {
 
 func GetPreparedGetUserProfile() *sql.Stmt {
 	return preparedGetUserProfile
+}
+
+func GetPreparedUpdateUserProfile() *sql.Stmt {
+	return preparedUpdateUserProfile
 }

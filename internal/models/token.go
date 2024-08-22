@@ -10,13 +10,13 @@ import (
 )
 
 type AuthToken struct {
-	UserID    int64                     `json:"user_id"`
+	UserID    int                       `json:"user_id"`
 	Token     string                    `json:"token"`
 	RevokedAt sql.NullTime              `json:"revoked_at"`
 	TokenType vokki_constants.TokenType `json:"token_type"`
 }
 
-func StoreToken(userID int64, token string, tokenType vokki_constants.TokenType) error {
+func StoreToken(userID int, token string, tokenType vokki_constants.TokenType) error {
 
 	db := database.GetDB()
 

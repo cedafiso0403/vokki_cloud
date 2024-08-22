@@ -41,7 +41,7 @@ func Authenticate(credentials Credentials) (int, string, error) {
 		return 0, "", auth_error.ErrIncorrectCredentials
 	}
 
-	token, err := utils.GenerateJWT(int64(user.ID))
+	token, err := utils.GenerateJWT(user.ID)
 	if err != nil {
 		return 0, "", err
 	}
@@ -49,7 +49,7 @@ func Authenticate(credentials Credentials) (int, string, error) {
 	return user.ID, token, nil
 }
 
-func ActivateUser(userID int64, token string) error {
+func ActivateUser(userID int, token string) error {
 
 	verificationToken := models.AuthToken{}
 
@@ -91,13 +91,13 @@ func RequestNewPasswordEmail(email string) error {
 		return err
 	}
 
-	resetPasswordToken, err := utils.GenerateJWT(int64(user.ID))
+	resetPasswordToken, err := utils.GenerateJWT(user.ID)
 
 	if err != nil {
 		return err
 	}
 
-	err = models.StoreToken(int64(user.ID), resetPasswordToken, vokki_constants.ResetPassword)
+	err = models.StoreToken(user.ID, resetPasswordToken, vokki_constants.ResetPassword)
 
 	if err != nil {
 		return err
