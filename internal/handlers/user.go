@@ -118,7 +118,9 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error generating JWT: ", err)
 	} else {
 		models.StoreToken(userCreated.ID, userJWT, vokki_constants.EmailToken)
-		services.SendVerificationEmail(userCreated, userJWT)
+		go func() {
+			services.SendVerificationEmail(userCreated, userJWT)
+		}()
 	}
 
 	httputil.SuccessJsonResponse(w, map[string]string{
