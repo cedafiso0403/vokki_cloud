@@ -29,6 +29,11 @@ type UserProfile struct {
 	LastName  string `json:"last_name" db:"last_name" example:"Doe"`
 }
 
+type UpdateUserProfileRequest struct {
+	FirstName *string `json:"first_name" db:"first_name" example:"John"`
+	LastName  *string `json:"last_name" db:"last_name" example:"Doe"`
+}
+
 func GetUser(email string) (User, error) {
 
 	user := User{}
@@ -71,7 +76,7 @@ func (user *NewUserRequest) IsValidEmail() bool {
 
 //! Missing is password valid
 
-func GetUserProfile(userID int64) (UserProfile, error) {
+func GetUserProfile(userID int) (UserProfile, error) {
 
 	var userProfile = UserProfile{}
 
@@ -87,4 +92,18 @@ func GetUserProfile(userID int64) (UserProfile, error) {
 	userProfile.LastName = utils.ConvertNullString(lastName)
 
 	return userProfile, nil
+}
+
+func UpdateUserProfile(userID int, userProfile UpdateUserProfileRequest) (UserProfile, error) {
+
+	updatedUser := UserProfile{}
+
+	err := database.GetPreparedUpdateUserProfile().QueryRow(userProfile.FirstName, userProfile.LastName, userID).Scan(&updatedUser.ID, &updatedUser.Email, &updatedUser.FirstName, &updatedUser.LastName)
+
+	if err != nil {
+		log.Println("Error updating user profile: ", err)
+		return updatedUser, err
+	}
+
+	return updatedUser, nil
 }

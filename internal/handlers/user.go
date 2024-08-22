@@ -28,7 +28,12 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	timeNow := time.Now().UTC()
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Method not allowed",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -41,12 +46,22 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&newUser)
 
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Parameters are invalid",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
 	if newUser.Password == "" || newUser.ConfirmationPassword == "" || newUser.Email == "" {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Password, Email and Confirmation Password are required",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -97,13 +112,15 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userJWT, err := utils.GenerateJWT(int64(userCreated.ID))
+	userJWT, err := utils.GenerateJWT(userCreated.ID)
 
 	if err != nil {
 		log.Println("Error generating JWT: ", err)
 	} else {
-		models.StoreToken(int64(userCreated.ID), userJWT, vokki_constants.EmailToken)
-		services.SendVerificationEmail(userCreated, userJWT)
+		models.StoreToken(userCreated.ID, userJWT, vokki_constants.EmailToken)
+		go func() {
+			services.SendVerificationEmail(userCreated, userJWT)
+		}()
 	}
 
 	httputil.SuccessJsonResponse(w, map[string]string{
@@ -132,21 +149,31 @@ func VerifyUser(w http.ResponseWriter, r *http.Request) {
 	token := r.Context().Value(vokki_constants.TokenKey)
 
 	if userID == 0 || userID == nil {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "User ID not found",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
 	if token == "" || token == nil {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Token required",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
-	err := services.ActivateUser(userID.(int64), token.(string))
+	err := services.ActivateUser(userID.(int), token.(string))
 
 	if err != nil {
 		errorResponse := httputil.UnauthorizedErrorResponse{
 			Timestamp: utils.FormatDate(timeNow),
-			Status:    http.StatusBadRequest,
+			Status:    http.StatusUnauthorized,
 			Message:   err.Error(),
 		}
 		httputil.ErrorJsonResponse(w, errorResponse, http.StatusBadRequest)
@@ -184,7 +211,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := models.GetUserProfile(userID.(int64))
+	user, err := models.GetUserProfile(userID.(int))
 
 	if err != nil {
 		http.Error(w, "", http.StatusInternalServerError)
@@ -193,6 +220,68 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 
 	httputil.SuccessJsonResponse(w, map[string]any{
 		"data":       user,
+		"time_stamp": utils.FormatDate(timeNow),
+	})
+}
+
+// Verify godoc
+// @Summary Update user profile
+// @Description Update profile for authenticated user
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Security BearerAuth
+// @Param User body models.UpdateUserProfileRequest false "First Name and Last Name""
+// @Success 200 {object} models.UserProfile "User Profile"
+// @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
+// @Failure 401 {object} httputil.UnauthorizedErrorResponse "Unauthorized"
+// @Failure 500 "Internal Server Error"
+// @Router /user [put]
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+
+	timeNow := time.Now().UTC()
+
+	userID := r.Context().Value(vokki_constants.UserIDKey)
+
+	if userID == 0 || userID == nil {
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "User ID not found",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
+		return
+	}
+
+	var updateUserProfileRequest models.UpdateUserProfileRequest
+
+	decoder := json.NewDecoder(r.Body)
+
+	decoder.DisallowUnknownFields()
+
+	err := decoder.Decode(&updateUserProfileRequest)
+
+	if err != nil {
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Paremeters are invalid",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
+		return
+	}
+
+	updatedUser, err := models.UpdateUserProfile(userID.(int), updateUserProfileRequest)
+
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+
+	}
+
+	httputil.SuccessJsonResponse(w, map[string]any{
+		"message":    "User updated",
+		"data":       updatedUser,
 		"time_stamp": utils.FormatDate(timeNow),
 	})
 }
