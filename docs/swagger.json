@@ -109,7 +109,7 @@
                 "parameters": [
                     {
                         "description": "User Email",
-                        "name": "request",
+                        "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -148,6 +148,57 @@
                     "User"
                 ],
                 "summary": "Get user profile",
+                "responses": {
+                    "200": {
+                        "description": "User Profile",
+                        "schema": {
+                            "$ref": "#/definitions/models.UserProfile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.BadRequestErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httputil.UnauthorizedErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update profile for authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update user profile",
+                "parameters": [
+                    {
+                        "description": "First Name and Last Name",
+                        "name": "User",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserProfileRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "User Profile",
@@ -285,6 +336,19 @@
                 "password": {
                     "type": "string",
                     "example": "password"
+                }
+            }
+        },
+        "models.UpdateUserProfileRequest": {
+            "type": "object",
+            "properties": {
+                "first_name": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "last_name": {
+                    "type": "string",
+                    "example": "Doe"
                 }
             }
         },
