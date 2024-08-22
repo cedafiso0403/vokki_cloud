@@ -36,7 +36,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&credentials)
 
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Parameters are invalid",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -62,7 +67,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = models.StoreToken(int64(userID), token, vokki_constants.AuthToken)
+	err = models.StoreToken(userID, token, vokki_constants.AuthToken)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,7 +83,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 // @Tags Auth
 // @Accept  json
 // @Produce  json
-// @Param request body services.NewPasswordEmailRequest true "User Email"
+// @Param  message body services.NewPasswordEmailRequest true "User Email"
 // @Success 200
 // @Failure 400 {object} httputil.BadRequestErrorResponse "Bad Request"
 // @Failure 500 "Internal Server Error"
@@ -88,7 +93,12 @@ func RequestResetPassword(w http.ResponseWriter, r *http.Request) {
 	timeNow := time.Now().UTC()
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Method not allowed",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 
@@ -101,7 +111,12 @@ func RequestResetPassword(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&userEmail)
 
 	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
+		errorResponse := httputil.BadRequestErrorResponse{
+			Timestamp: utils.FormatDate(timeNow),
+			Status:    http.StatusBadRequest,
+			Message:   "Parameters are invalid",
+		}
+		httputil.ErrorJsonResponse(w, errorResponse, errorResponse.Status)
 		return
 	}
 

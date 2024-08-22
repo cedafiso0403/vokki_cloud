@@ -6,15 +6,15 @@ import (
 )
 
 type BadRequestErrorResponse struct {
-	Timestamp string `json:"timestamp" example:"2024-07-18T15:36:59Z"`
 	Status    int    `json:"error_code" example:"400"`
 	Message   string `json:"message" example:"Invalid request parameters"`
+	Timestamp string `json:"timestamp" example:"2024-07-18T15:36:59Z"`
 }
 
 type UnauthorizedErrorResponse struct {
-	Timestamp string `json:"timestamp" example:"2024-07-18T15:36:59Z"`
 	Status    int    `json:"error_code" example:"401"`
 	Message   string `json:"message" example:"Unauthorized access"`
+	Timestamp string `json:"timestamp" example:"2024-07-18T15:36:59Z"`
 }
 
 func ErrorJsonResponse(w http.ResponseWriter, data interface{}, status int) {
