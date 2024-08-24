@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Email Verification</title>
@@ -10,6 +11,7 @@
             margin: 0;
             padding: 0;
         }
+
         .container {
             width: 100%;
             max-width: 600px;
@@ -19,32 +21,36 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
         h1 {
             color: #333333;
         }
+
         p {
             color: #555555;
         }
+
         a {
             display: inline-block;
             padding: 10px 20px;
             background-color: #007bff;
+            color: #ffffff;
             text-decoration: none;
             border-radius: 5px;
         }
-        span {
-            color: #ffffff;
-        }
+
         a:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Email Verification</h1>
         <p>Please verify your email by clicking the following link:</p>
-        <p><a href="https://vokki.net{{.Route}}?token={{.Token}}"><span>Verify Email<span></a></p>
+        <p><a href="{{.BaseScheme}}://{{.BaseHost}}{{.BasePath}}{{.Route}}?token={{.Token}}">Verify Email</a></p>
     </div>
 </body>
+
 </html>
