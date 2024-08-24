@@ -14,6 +14,7 @@ import (
 	"vokki_cloud/internal/database"
 	"vokki_cloud/internal/router"
 	"vokki_cloud/internal/shared"
+	"vokki_cloud/internal/constants"
 
 	_ "github.com/lib/pq"
 )
@@ -66,9 +67,9 @@ func startServer(ctx context.Context, wg *sync.WaitGroup, server *http.Server) {
 	docs.SwaggerInfo.Title = "Vokki Cloud API"
 	docs.SwaggerInfo.Description = "This is the API for Vokki mobile app."
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "vokki.net"
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	docs.SwaggerInfo.Schemes = []string{"https"}
+	docs.SwaggerInfo.Host = vokki_constants.BaseHost    
+    docs.SwaggerInfo.BasePath = vokki_constants.BasePath 
+    docs.SwaggerInfo.Schemes = []string{vokki_constants.BaseScheme} 
 
 	// Initialize token manager
 	shared.InitializeTokenManager()
