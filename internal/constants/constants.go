@@ -5,6 +5,12 @@ type ContextKey string
 type TokenType string
 
 const (
+	BaseHost   = "vokki.net"
+	BasePath   = "/api/v1"
+	BaseScheme = "https"
+)
+
+const (
 	EmailToken    TokenType = "email"
 	AuthToken     TokenType = "auth"
 	RefreshToken  TokenType = "refresh"

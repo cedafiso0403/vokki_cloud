@@ -17,6 +17,8 @@ var (
 	preparedGetUserEmailQuery *sql.Stmt
 	preparedGetUserProfile    *sql.Stmt
 	preparedUpdateUserProfile *sql.Stmt
+	preparedGetWordByText     *sql.Stmt
+	preparedGetTranslations   *sql.Stmt
 )
 
 func Connect() {
@@ -97,6 +99,16 @@ func initPreparedStatements() error {
 		return err
 	}
 
+	if preparedGetWordByText, err = db.Prepare("SELECT words.id, word, languages.language_code, language_name FROM words INNER JOIN languages on words.language_id = languages.id WHERE words.word=$1"); err != nil {
+		log.Println("Error preparing get word by text query: ", err)
+		return err
+	}
+
+	if preparedGetTranslations, err = db.Prepare("SELECT words.word, language_code, language_name FROM words INNER JOIN word_translations ON words.id = word_translations.translated_word_id INNER JOIN languages ON languages.id = words.language_id WHERE word_translations.word_id = $1"); err != nil {
+		log.Println("Error preparing get translations query: ", err)
+		return err
+	}
+
 	log.Println("All statements prepared successfully")
 	return nil
 }
@@ -134,6 +146,18 @@ func Close() {
 
 	if preparedGetUserProfile != nil {
 		preparedGetUserProfile.Close()
+	}
+
+	if preparedUpdateUserProfile != nil {
+		preparedUpdateUserProfile.Close()
+	}
+
+	if preparedGetWordByText != nil {
+		preparedGetWordByText.Close()
+	}
+
+	if preparedGetTranslations != nil {
+		preparedGetTranslations.Close()
 	}
 
 	if db != nil {
@@ -175,4 +199,12 @@ func GetPreparedGetUserProfile() *sql.Stmt {
 
 func GetPreparedUpdateUserProfile() *sql.Stmt {
 	return preparedUpdateUserProfile
+}
+
+func GetPreparedGetWordByText() *sql.Stmt {
+	return preparedGetWordByText
+}
+
+func GetPreparedGetTranslations() *sql.Stmt {
+	return preparedGetTranslations
 }
