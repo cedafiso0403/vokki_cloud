@@ -6,11 +6,12 @@ type TokenType string
 
 // Base path for the API
 
+
 const (
 	BaseHost   string = "vokki.net"
 	BasePath   string = "/api/v1"
 	BaseScheme string = "https"
-)
+
 
 const (
 	EmailToken    TokenType = "email"
