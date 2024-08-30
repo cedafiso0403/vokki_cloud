@@ -4,6 +4,13 @@ type ContextKey string
 
 type TokenType string
 
+// Base path for the API
+const (
+	BaseHost = "vokki.net"
+	BasePath = "/api/v1"
+	BaseScheme = "https"
+)
+
 const (
 	BaseHost   = "vokki.net"
 	BasePath   = "/api/v1"
