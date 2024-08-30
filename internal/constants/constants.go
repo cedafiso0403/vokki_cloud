@@ -34,4 +34,5 @@ const (
 	RouteCreateNewPassword = "/create-new-password"
 	RouteLandingPage       = "/"
 	RouteUser              = "/user"
+	RouteWords             = "/words"
 )
