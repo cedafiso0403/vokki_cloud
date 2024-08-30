@@ -25,6 +25,7 @@ import (
 // @Router /register [post]
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 
+	log.Println("Registering user")
 	timeNow := time.Now().UTC()
 
 	if r.Method != http.MethodPost {
