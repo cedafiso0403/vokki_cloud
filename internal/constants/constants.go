@@ -5,10 +5,11 @@ type ContextKey string
 type TokenType string
 
 // Base path for the API
+
 const (
-	BaseHost = "vokki.net"
-	BasePath = "/api/v1"
-	BaseScheme = "https"
+	BaseHost   string = "vokki.net"
+	BasePath   string = "/api/v1"
+	BaseScheme string = "https"
 )
 
 const (
@@ -35,4 +36,5 @@ const (
 	RouteCreateNewPassword = "/create-new-password"
 	RouteLandingPage       = "/"
 	RouteUser              = "/user"
+	RouteWords             = "/words"
 )

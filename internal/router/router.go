@@ -33,12 +33,17 @@ func SetupRouter() *mux.Router {
 
 	apiRouterPublic.HandleFunc(vokki_constants.RouteAlive, func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Alive"))
 	}).Methods("GET")
 
 	// Private routes
+
 	// User routes
 	apiRouterPrivate.HandleFunc(vokki_constants.RouteUser, handlers.GetUser).Methods("GET")
 	apiRouterPrivate.HandleFunc(vokki_constants.RouteUser, handlers.UpdateUser).Methods("PUT")
+
+	// Word routes
+	apiRouterPrivate.HandleFunc(vokki_constants.RouteWords, handlers.GetWordTranslations).Methods("GET")
 
 	return r
 }
